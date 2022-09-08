@@ -101,6 +101,14 @@ resourcestring
       CONFIRMMENUITEM5 = 'Показать время результата';
       CONFIRMMENUITEM6 = 'Показать ошибки результата';
 
+      CONTROLMENU0 = 'Просмотр видео';
+      CONTROLMENU1 = 'Выбрать консоль запуска таймера ';
+      CONTROLMENU2 = 'Указать скорость просмотра ';
+      CONTROLMENU3 = 'Просмотр фрагмента с ';
+      CONTROLMENU4 = 'Просмотр фрагмента по ';
+      CONTROLMENU5 = 'Редактировать оценки';
+      CONTROLMENU6 = 'Сохранить результаты';
+
       JUDGECALL0     = 'Нет';
       JUDGECALL1     = 'Повторный просмотр';
       JUDGECALL2     = 'Просмотр фрагмента';

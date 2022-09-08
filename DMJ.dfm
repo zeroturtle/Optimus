@@ -4,7 +4,7 @@ object DataJudge: TDataJudge
   OnDestroy = DataModuleDestroy
   Left = 198
   Top = 157
-  Height = 301
+  Height = 259
   Width = 406
   object tblViewDetail: TABSTable
     CurrentVersion = '7.90 '
@@ -14,11 +14,11 @@ object DataJudge: TDataJudge
     StoreDefs = True
     FieldDefs = <
       item
-        Name = 'Monitor'
+        Name = 'Result_ID'
         DataType = ftInteger
       end
       item
-        Name = 'Views'
+        Name = 'Monitor'
         DataType = ftInteger
       end
       item
@@ -34,57 +34,16 @@ object DataJudge: TDataJudge
         DataType = ftFloat
       end
       item
-        Name = 'Result_ID'
-        DataType = ftInteger
-      end
-      item
-        Name = 'ViewID'
-        DataType = ftLargeint
-      end>
-    TableName = 'ViewDetail'
-    Exclusive = False
-    Left = 24
-    Top = 16
-  end
-  object tblRoundError: TABSTable
-    CurrentVersion = '7.90 '
-    DatabaseName = 'MEMORY'
-    InMemory = True
-    ReadOnly = False
-    StoreDefs = True
-    IndexDefs = <
-      item
-        Name = 'tblRoundErrorIndex1'
-        Fields = 'Result_ID'
-      end>
-    FieldDefs = <
-      item
-        Name = 'Port'
-        DataType = ftInteger
-      end
-      item
-        Name = 'Views'
-        DataType = ftInteger
-      end
-      item
-        Name = 'Result_ID'
+        Name = 'Judge_ID'
         DataType = ftInteger
       end
       item
         Name = 'Error_ID'
         DataType = ftInteger
-      end
-      item
-        Name = 'FigureNum'
-        DataType = ftInteger
-      end
-      item
-        Name = 'ViewID'
-        DataType = ftLargeint
       end>
-    TableName = 'RoundError'
+    TableName = 'ViewDetail'
     Exclusive = False
-    Left = 104
+    Left = 24
     Top = 16
   end
   object tblResultDetail: TABSTable
@@ -102,10 +61,6 @@ object DataJudge: TDataJudge
       item
         Name = 'Result_ID'
         DataType = ftInteger
-      end
-      item
-        Name = 'Views'
-        DataType = ftSmallint
       end
       item
         Name = 'IsTrainee'
@@ -361,7 +316,7 @@ object DataJudge: TDataJudge
       end>
     TableName = 'ResultDetail'
     Exclusive = False
-    Left = 192
+    Left = 96
     Top = 16
   end
   object qryResultViewDetail: TABSQuery
@@ -371,12 +326,13 @@ object DataJudge: TDataJudge
     ReadOnly = False
     DataSource = dsList
     SQL.Strings = (
+      '-- '#1087#1077#1088#1077#1085#1086#1089#1080#1084' '#1086#1094#1077#1085#1082#1080' '#1080#1079' ViewDetail '#1074' '#1086#1076#1085#1091' '#1089#1090#1088#1086#1082#1091' ResultDetail'
       'DELETE FROM MEMORY ResultDetail;'
       ''
       'INSERT INTO MEMORY ResultDetail'
       
-        'SELECT distinct jr.Result_ID, v.Views, jr.IsTrainee, jr.Judge_ID' +
-        ', jr.Port,'
+        'SELECT distinct jr.Result_ID, jr.IsTrainee, jr.Judge_ID, jr.Moni' +
+        'tor,'
       'avg(case when sequence = 0 then point else null end) as p1,'
       'avg(case when sequence = 1 then point else null end) as p2,'
       'avg(case when sequence = 2 then point else null end) as p3,'
@@ -439,23 +395,20 @@ object DataJudge: TDataJudge
       'avg(case when sequence = 28 then ATime else null end) as T29,'
       'avg(case when sequence = 29 then ATime else null end) as T30'
       'FROM'
-      '  (SELECT j.* FROM RoundResult r, Judges j'
-      '   -- '#1074#1089#1077' '#1089#1091#1076#1100#1080' '#1089#1086#1088#1077#1074#1085#1086#1074#1072#1085#1080#1103
       
-        '   WHERE r.Competition_ID=j.Competition_ID AND r.Result_ID=:Resu' +
-        'lt_ID'
-      '   -- '#1095#1090#1086' '#1085#1072' '#1084#1086#1085#1080#1090#1086#1088#1072#1093
-      '         AND port is not null) jr'
-      '  LEFT JOIN MEMORY ViewDetail v ON (v.Monitor=jr.Port-1)'
+        '  (SELECT Result_ID, j.Judge_ID, j.Port-1 Monitor, IsTrainee FRO' +
+        'M RoundResult r, Judges j'
+      '   -- '#1074#1089#1077' '#1089#1091#1076#1100#1080' '#1089#1086#1088#1077#1074#1085#1086#1074#1072#1085#1080#1103' '#1095#1090#1086' '#1085#1072' '#1084#1086#1085#1080#1090#1086#1088#1072#1093
+      
+        '   WHERE Port is not null AND r.Competition_ID=j.Competition_ID ' +
+        ' AND r.Result_ID=:Result_ID'
+      '  ) jr'
+      '  LEFT JOIN MEMORY ViewDetail v ON (v.Monitor=jr.Monitor)'
       
         '--  LEFT JOIN MEMORY ViewDetail v ON (jr.Result_ID=v.Result_ID  ' +
         'AND v.Monitor=jr.Port-1)'
-      
-        'GROUP BY jr.Result_ID, v.Views, jr.IsTrainee, jr.Judge_ID, jr.Po' +
-        'rt'
-      ''
-      '  --ViewID=LastAutoinc(ViewNum,ViewID)')
-    Left = 288
+      'GROUP BY jr.Result_ID, jr.IsTrainee, jr.Judge_ID, jr.Monitor')
+    Left = 224
     Top = 16
     ParamData = <
       item
@@ -487,7 +440,7 @@ object DataJudge: TDataJudge
         'AND not EXISTS (SELECT * FROM ResultDetail rd WHERE rr.Result_ID' +
         '=rd.Result_ID)')
     Left = 216
-    Top = 144
+    Top = 104
     ParamData = <
       item
         DataType = ftUnknown
@@ -498,7 +451,7 @@ object DataJudge: TDataJudge
   object dsList: TDataSource
     DataSet = qryList
     Left = 216
-    Top = 200
+    Top = 160
   end
   object qryScore: TABSQuery
     CurrentVersion = '7.90 '
@@ -507,7 +460,7 @@ object DataJudge: TDataJudge
     ReadOnly = False
     DataSource = dsList
     Left = 16
-    Top = 144
+    Top = 104
   end
   object qryTime: TABSQuery
     CurrentVersion = '7.90 '
@@ -516,7 +469,7 @@ object DataJudge: TDataJudge
     ReadOnly = False
     DataSource = dsList
     Left = 80
-    Top = 144
+    Top = 104
   end
   object qryError: TABSQuery
     CurrentVersion = '7.90 '
@@ -525,22 +478,22 @@ object DataJudge: TDataJudge
     ReadOnly = False
     DataSource = dsList
     Left = 144
-    Top = 144
+    Top = 104
   end
   object dsScore: TDataSource
     DataSet = qryScore
     Left = 16
-    Top = 200
+    Top = 160
   end
   object dsTime: TDataSource
     DataSet = qryTime
     Left = 80
-    Top = 200
+    Top = 160
   end
   object dsError: TDataSource
     DataSet = qryError
     Left = 144
-    Top = 200
+    Top = 160
   end
   object tblSequence: TABSTable
     CurrentVersion = '7.90 '
@@ -612,12 +565,12 @@ object DataJudge: TDataJudge
     Exclusive = False
     MasterFields = 'Round_ID'
     Left = 290
-    Top = 144
+    Top = 104
   end
   object dsSequence: TDataSource
     DataSet = tblSequence
     Left = 288
-    Top = 200
+    Top = 160
   end
   object qrySequence: TABSQuery
     CurrentVersion = '7.90 '
@@ -641,51 +594,7 @@ object DataJudge: TDataJudge
       'AND c.Pool_ID=p.Type_ID AND IMG>0'
       'order by IMG')
     Left = 288
-    Top = 80
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'Result_ID'
-        ParamType = ptUnknown
-      end>
-  end
-  object qryMoveToDB: TABSQuery
-    CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
-    InMemory = False
-    ReadOnly = False
-    SQL.Strings = (
-      '/*'
-      
-        '-- '#1089#1086#1093#1088#1072#1085#1080#1090#1100' '#1074' '#1073#1072#1079#1091' '#1080#1079' '#1074#1088#1077#1084#1077#1085#1085#1099#1093' '#1090#1072#1073#1083#1080#1094' '#1088#1077#1079#1091#1083#1100#1090#1072#1090#1099' '#1090#1077#1082#1091#1097#1077#1075#1086' '#1087#1088#1086#1089 +
-        #1084#1086#1090#1088#1072
-      '*/'
-      'INSERT INTO ViewNum VALUES (NULL, NOW);'
-      'UPDATE MEMORY ViewDetail SET ViewID=LastAutoinc(ViewNum,ViewID);'
-      'UPDATE MEMORY RoundError SET ViewID=LastAutoinc(ViewNum,ViewID);'
-      
-        '--UPDATE MEMORY ResultDetail SET ViewID=LastAutoinc(ViewNum,View' +
-        'ID);'
-      ''
-      'INSERT INTO ViewDetail SELECT * FROM MEMORY ViewDetail;'
-      'INSERT INTO RoundError SELECT * FROM MEMORY RoundError;'
-      '-- INSERT INTO ResultDetail SELECT * FROM MEMORY ResultDetail;'
-      ''
-      'DELETE FROM MEMORY ViewDetail;'
-      'DELETE FROM MEMORY RoundError;'
-      '--DELETE FROM MEMORY ResultDetail;'
-      ''
-      '/*'
-      '// '#1085#1091#1078#1077#1085' Result_ID!!!'
-      
-        'UPDATE RoundResult SET ViewID=LastAutoinc(ViewNum, ViewID), Last' +
-        'Time = 0 WHERE Result_ID=:Result_ID;'
-      
-        'UPDATE ViewNum SET ViewNumber=%View, StartTime=%StartTime WHERE ' +
-        'ViewID=LastAutoinc(ViewNum,ViewID);'
-      '*/')
-    Left = 192
-    Top = 80
+    Top = 16
     ParamData = <
       item
         DataType = ftUnknown

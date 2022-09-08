@@ -762,10 +762,6 @@ object DataMain: TDataMain
       Size = 50
       Lookup = True
     end
-    object tblTeamRoundComment: TStringField
-      FieldName = 'Comment'
-      Size = 500
-    end
     object tblTeamRoundSign: TBooleanField
       FieldName = 'Sign'
     end
@@ -1472,9 +1468,6 @@ object DataMain: TDataMain
     object tblResultDetailResult_ID: TIntegerField
       FieldName = 'Result_ID'
     end
-    object tblResultDetailViews: TIntegerField
-      FieldName = 'Views'
-    end
     object tblResultDetailIsTrainee: TBooleanField
       FieldName = 'IsTrainee'
     end
@@ -2162,33 +2155,21 @@ object DataMain: TDataMain
     ReadOnly = False
     DataSource = dsTeamRound
     SQL.Strings = (
-      'SELECT Figure, Code, Description, rank FROM'
-      '(SELECT Figure,  Error_ID, max(CNT) rank FROM'
+      'SELECT Sequence, Description, max(CNT)  FROM'
       
-        '(SELECT FigureNum+1 Figure,  Error_ID, [View], count(re.Error_ID' +
-        ') CNT'
-      'FROM RoundError re'
-      'WHERE Result_ID= :Result_ID'
-      'GROUP BY FigureNum, Error_ID, [View])'
-      'GROUP BY Figure,  Error_ID) a'
-      'LEFT JOIN Errors e ON (e.Error_ID=a.Error_ID)'
-      'WHERE '
+        '  (SELECT Result_ID, Sequence+1,  Error_ID, count(vd.Error_ID) C' +
+        'NT'
+      '  FROM ViewDetail vd  WHERE Result_ID= :Result_ID'
+      '  GROUP BY Result_ID, Sequence, Error_ID) a'
+      '  LEFT JOIN Errors e ON e.Error_ID=a.Error_ID'
+      'GROUP BY  Sequence, Description'
       
-        '[View] = (SELECT max([View]) FROM RoundError WHERE Result_ID= :R' +
-        'esult_ID)'
-      
-        'AND rank >= (SELECT count(Monitor)/2 FROM ResultDetail WHERE Res' +
-        'ult_ID= :Result_ID) '
-      'ORDER BY 1'
-      '')
+        'HAVING max(CNT)  >= (SELECT cast(count(Monitor) float)/2 FROM Re' +
+        'sultDetail WHERE Result_ID= :Result_ID) '
+      'ORDER BY 1')
     Left = 568
     Top = 152
     ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'Result_ID'
-        ParamType = ptUnknown
-      end
       item
         DataType = ftUnknown
         Name = 'Result_ID'

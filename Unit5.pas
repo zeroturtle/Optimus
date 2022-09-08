@@ -189,7 +189,6 @@ type
     tblCompetitionPool: TStringField;
     tblTeamRoundPenalty_Name: TStringField;
     tblTeamRoundPenalty_ID: TIntegerField;
-    tblResultDetailViews: TIntegerField;
     frShilders: TfrxDBDataset;
     qryGetQuery: TABSQuery;
     qryRoundResult: TABSQuery;
@@ -221,7 +220,6 @@ type
     tblPeopleClub_Name: TStringField;
     tblTeamClub_ID: TIntegerField;
     tblTeamClub_Name: TStringField;
-    tblTeamRoundComment: TStringField;
     tblCompetitionOptions: TMemoField;
     tblTeamRoundSign: TBooleanField;
     tblCompetitionDateFrom: TDateField;
