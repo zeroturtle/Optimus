@@ -8,7 +8,7 @@ uses
 
 type
   TDataMain = class(TDataModule)
-    dbJudbge: TABSDatabase;
+    dbJudge: TABSDatabase;
     tblPool: TABSTable;
     tblRoles: TABSTable;
     tblPeople: TABSTable;
@@ -17,7 +17,6 @@ type
     dsTeam: TDataSource;
     tblTeamRound: TABSTable;
     dsTeamRound: TDataSource;
-    qryCalcResult: TABSQuery;
     dsComp: TDataSource;
     dsJudge: TDataSource;
     tblJudgeJudge_ID: TAutoIncField;
@@ -148,7 +147,6 @@ type
     tblTeamGuest: TBooleanField;
     tblTeamRoundJudgeTime: TDateTimeField;
     tblCompetitionMask: TStringField;
-    qryCalcRound: TABSQuery;
     tblResultDetailT1: TFloatField;
     tblResultDetailT2: TFloatField;
     tblResultDetailT3: TFloatField;
@@ -307,6 +305,7 @@ type
     tblResultDetail1P10: TBooleanField;
     tblMemberResultTeam_ID: TIntegerField;
     tblMemberResultMemberTeam_ID: TIntegerField;
+    qryCalcResult: TABSQuery;
     procedure tblCompetition2BeforeClose(DataSet: TDataSet);
     procedure tblRoundResultBeforeOpen(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
@@ -406,10 +405,10 @@ end;
 
 procedure TDataMain.DataModuleCreate(Sender: TObject);
 begin
-  dbJudbge.DatabaseFileName := DATABASEFILE;
+  dbJudge.DatabaseFileName := DATABASEFILE;
 //  dbJudbge.MultiUser := True;
   try
-    dbJudbge.Open;
+    dbJudge.Open;
   except
     Halt(1);
   end;
@@ -417,7 +416,7 @@ end;
 
 procedure TDataMain.DataModuleDestroy(Sender: TObject);
 begin
-  dbJudbge.Close;
+  dbJudge.Close;
 end;
 
 procedure TDataMain.tblJudgeBeforeOpen(DataSet: TDataSet);
@@ -617,22 +616,19 @@ end;
 
 procedure TDataMain.tblTeamRoundBeforeDelete(DataSet: TDataSet);
 var j: Integer;
-    Q: TABSQuery;
 begin
-  try
-    Q := TABSQuery.Create(Self);
-    Q.DatabaseName :=  'dbJudbge';
+  with TABSQuery.Create(Self) do
+    try
+      DatabaseName :=  'dbJudge';
   {удалить предыдущий результат чтоб начать судить повторно}
-    with Q do begin
       SQL.Clear;
-      SQL.Add('DELETE FROM RoundError WHERE Result_ID=:FFF; DELETE FROM resultdetail rd  WHERE rd.Result_ID=:CCC; DELETE FROM ViewDetail WHERE Result_ID=:DDD');
+      SQL.Add('DELETE FROM resultdetail WHERE Result_ID=:CCC; DELETE FROM ViewDetail WHERE Result_ID=:DDD');
       Prepare;
       for j := 0 to ParamCount-1 do Params[j].AsInteger := DataSet.FieldByName('Result_ID').AsInteger;
       ExecSQL;
+    finally
+      Free;
     end;
-  finally
-    Q.Free;
-  end;
 end;
 
 procedure TDataMain.qryJumpErrorBeforeOpen(DataSet: TDataSet);
@@ -705,7 +701,6 @@ begin
 // закрыть все что связано с отчетами
   qryCompetition.Close;
   qryCompetitors.Close;
-  qryRoundResult.Close;
   qryReport.Close;
 
 // закрыть все что было открыто вместе с таблицей
@@ -805,23 +800,20 @@ end;
 
 procedure TDataMain.tblResultDetailBeforeDelete(DataSet: TDataSet);
 var j: Integer;
-    Q: TABSQuery;
 begin
-  try
-    Q := TABSQuery.Create(Self);
-    Q.DatabaseName :=  'dbJudbge';
   {удалить предыдущий результат чтоб начать судить повторно}
-    with Q do begin
+  with TABSQuery.Create(Self) do
+    try
+      DatabaseName :=  'dbJudge';
       SQL.Clear;
       SQL.Add('DELETE FROM ViewDetail WHERE Result_ID=:DDD AND Monitor=:AAA');
       Prepare;
       Params[0].AsInteger := DataSet.FieldByName('Result_ID').AsInteger;
       Params[1].AsInteger := DataSet.FieldByName('Monitor').AsInteger;
       ExecSQL;
+    finally
+      Free;
     end;
-  finally
-    Q.Free;
-  end;
 end;
 
 procedure TDataMain.tblMemberResultBeforeOpen(DataSet: TDataSet);
@@ -899,18 +891,20 @@ end;
 procedure TDataMain.tblResultDetail1BeforeOpen(DataSet: TDataSet);
 var i: integer;
 begin
-  with TABSQuery.Create(Self) do begin
-    SQL.Add('SELECT Result_ID, P1');
-    for i := 2 to 10 do  // tblTask.FieldByName('MQP').AsInteger do
-      SQL.Add(Format(',CASE WHEN P%d=1 THEN True ELSE False END P%d',[i,i]));
-    SQL.Add('INTO MEMORY MemResultDetail FROM ResultDetail');
-    SQL.Add('WHERE Result_ID IN (SELECT Result_ID FROM RoundResult WHERE Competition_ID = :Competition_ID);');
-    SQL.Add('create unique index UniqueName ON MEMORY MemResultDetail (Result_ID)');
-    DatabaseName := 'dbJudbge';
-    DataSource := DataMain.dsComp;
-    ExecSQL;
-    Free;
-  end;
+  with TABSQuery.Create(Self) do
+    try
+      SQL.Add('SELECT Result_ID, P1');
+      for i := 2 to 10 do  // tblTask.FieldByName('MQP').AsInteger do
+        SQL.Add(Format(',CASE WHEN P%d=1 THEN True ELSE False END P%d',[i,i]));
+      SQL.Add('INTO MEMORY MemResultDetail FROM ResultDetail');
+      SQL.Add('WHERE Result_ID IN (SELECT Result_ID FROM RoundResult WHERE Competition_ID = :Competition_ID);');
+      SQL.Add('create unique index UniqueName ON MEMORY MemResultDetail (Result_ID)');
+      DatabaseName := 'dbJudge';
+      DataSource := DataMain.dsComp;
+      ExecSQL;
+    finally
+      Free;
+    end;
 end;
 
 procedure TDataMain.tblResultDetail1AfterClose(DataSet: TDataSet);

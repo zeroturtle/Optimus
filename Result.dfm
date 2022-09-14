@@ -24,14 +24,15 @@ inherited fResult: TfResult
     object ToolButton1: TToolButton
       Left = 207
       Top = 0
+      Hint = #1055#1086#1089#1095#1080#1090#1072#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090
       Action = act_Calc
     end
     object ToolButton3: TToolButton
       Left = 232
       Top = 0
-      Caption = 'ToolButton3'
-      ImageIndex = 19
-      OnClick = ActionExecute
+      Hint = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1086#1094#1077#1085#1082#1091
+      Action = act_Change
+      Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1086#1094#1077#1085#1082#1091
     end
   end
   inherited ctl_FilterPanel: TPanel
@@ -393,6 +394,12 @@ inherited fResult: TfResult
     inherited act_Calc: TAction
       Caption = #1055#1086#1089#1095#1080#1090#1072#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090
       OnExecute = ActionExecute
+    end
+    object act_Change: TAction
+      Tag = 12
+      Category = 'DB'
+      Caption = 'act_Change'
+      ImageIndex = 17
     end
   end
   inherited cxPropertiesStore1: TcxPropertiesStore

@@ -34,10 +34,6 @@ object DataJudge: TDataJudge
         DataType = ftFloat
       end
       item
-        Name = 'Judge_ID'
-        DataType = ftInteger
-      end
-      item
         Name = 'Error_ID'
         DataType = ftInteger
       end>
@@ -321,7 +317,7 @@ object DataJudge: TDataJudge
   end
   object qryResultViewDetail: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     DataSource = dsList
@@ -419,7 +415,7 @@ object DataJudge: TDataJudge
   end
   object qryList: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     BeforeOpen = qryListBeforeOpen
@@ -455,7 +451,7 @@ object DataJudge: TDataJudge
   end
   object qryScore: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     DataSource = dsList
@@ -464,7 +460,7 @@ object DataJudge: TDataJudge
   end
   object qryTime: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     DataSource = dsList
@@ -473,7 +469,7 @@ object DataJudge: TDataJudge
   end
   object qryError: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     DataSource = dsList
@@ -574,7 +570,7 @@ object DataJudge: TDataJudge
   end
   object qrySequence: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     AfterOpen = qrySequenceAfterOpen

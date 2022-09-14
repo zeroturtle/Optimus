@@ -42,7 +42,6 @@ type
     N14: TMenuItem;
     N15: TMenuItem;
     N16: TMenuItem;
-    Image1: TImage;
     N13: TMenuItem;
     N17: TMenuItem;
     N18: TMenuItem;
@@ -115,7 +114,7 @@ implementation
 uses Pool, Roles, People, Comps, Result, Print, Select, Jpeg, StrUtils,
      constant, shf_FormAbstract, options, Team, Country, Judges,
   wthread, About, Splash, XPBase64, Error, Club, Unit5, SplashScr, JCtrl,
-  ScreenForm, iResult;
+  ScreenForm, iResult, fLicense;
 
 {$R *.dfm}
 
@@ -197,8 +196,7 @@ end;
 
 procedure TfMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  //Просроченная лицензия
-  if not License^.Active or (MessageDlg(APPCLOSEMSG, mtConfirmation, [mbYes,mbNo], 0) = mrYes) then
+  if (MessageDlg(APPCLOSEMSG, mtConfirmation, [mbYes,mbNo], 0) = mrYes) then
     CanClose := true
   else
     CanClose := False;
@@ -235,6 +233,8 @@ begin
   // -TFTP
   
   if OpenForm(Competition_GUID) then TfCompetition.Create(Self);
+  SplashScreen.Hide;
+  SplashScreen.Free;
 end;
 
 {
@@ -262,16 +262,7 @@ var i, j: integer;
   Year, Month, Day, Hour, Min, Sec, MSec: Word;
   Rt:TRect;
   jp:TJpegImage;
-const
-  LICENCE = 1;
-{
-  LIC_YEAR1 = 2022; LIC_MONTH1 = 1; LIC_DAY1 = 1;
-  LIC_YEAR2 = 2022; LIC_MONTH2 = 12; LIC_DAY2 = 31;
-  LIC_NUMBER = '1UA';
-  LIC_QTY = 5;
-  LIC_TYPE = [FS2,FS4,FS8,VFS,SF,SF6,FFF,FFC,FFS,WSP,WSA,CP,CF];
-  LIC_OWNER = '"DZ Mayskoe"  www.mayskoe.com';
-}
+
 {
   LIC_YEAR1 = 2015; LIC_MONTH1 = 7; LIC_DAY1 = 1;
   LIC_YEAR2 = 2015; LIC_MONTH2 = 12; LIC_DAY2 = 31;
@@ -296,10 +287,17 @@ const
   LIC_TYPE : TEventSet = [FS2,FS4,VFS,SF,SF6];
   LIC_OWNER = 'Клуб Десантник Шапарин Юрий Юрьевич mobile1360996@gmail.com';
 }
-begin
-  FormID := Main_GUID;
-  Caption := APPLICATIONCAPTION;
 
+const
+// параметры для новой лицензии
+  LIC_YEAR1 = 2022; LIC_MONTH1 = 1; LIC_DAY1 = 1;
+  LIC_YEAR2 = 2022; LIC_MONTH2 = 12; LIC_DAY2 = 31;
+  LIC_NUMBER = '1UA';
+  LIC_QTY = 5;
+  LIC_TYPE = [FS2,FS4,FS8,VFS,SF,SF6,FFF,FFC,FFS,WSP,WSA,CP,CF];
+  LIC_OWNER = '"DZ Mayskoe"  www.mayskoe.com';
+  
+begin
 // считываем параметры командной строки
   DATABASEFILE := ChangeFileExt(ParamStr(0), '.abs');  // имя файла БД по умолчанию
   LicenseFile := ChangeFileExt(ParamStr(0), '.lic');   // файл лицензии
@@ -325,18 +323,78 @@ begin
     inc(i);
   end;
 
-  StatusBar1.Panels[0].Text := Format(APPVERSIONNUMBER,[AppVersion(Application.ExeName)]);
-  R := TCnRawKeyBoard.Create(Self);
-  R.OnRawKeyDown := RawKeyDown;
-  R.OnRawKeyUp := RawKeyUp;
-  CanJudge := false;
+//*****************************
+// Создаем лицензию
+//*****************************
+  GetMem(License, SizeOf(TLicense));
+{
+//*****************************
+ // создаем и сохраняем лицензию в файл --InitLicense
+//  DecodeDate(Now, Year, Month, Day);
+  with License^ do begin
+//    DateStart := EncodeDateTime(Year,Month,Day,0,0,0,0);
+    DateStart := EncodeDateTime(LIC_YEAR1,LIC_MONTH1,LIC_DAY1,0,0,0,0);
+    DateEnd := EncodeDateTime(LIC_YEAR2,LIC_MONTH2,LIC_DAY2,0,0,0,0); // YEAR,MONTH,DAY,HOUR,MINUTE,SECOND,MS
+    Number := LIC_NUMBER;
+    QtyLicense := LIC_QTY;
+    EventType := LIC_TYPE;
+    Owner := LIC_OWNER;
+  end;
 
-  HistoryListBox.Lines.Add(Format(MONITORCOUNTMSG, [DateTimeToStr(Now),Screen.MonitorCount]));
-  for j := 0 to High(MonList) do   // прочитать разрешение всех подключенных экранов
-    with MonList[j] do
-      HistoryListBox.Lines.Add(Format(MONITORRESMSG, [DateTimeToStr(Now),j,h,dc,r.Left,r.Top,r.Right,r.Bottom]));
-  
-// загружаем фоновую картинку на главной форме
+// ниже - это процедура SaveLicense(LicenseFile);
+  try
+    CryptBinaryToString(pointer(License), SizeOf(License^), Flags, nil, sz);
+    SetLength(RS, sz);
+    CryptBinaryToString(pointer(License), SizeOf(License^), Flags, pointer(RS), sz);
+    S := TFileStream.Create(LicenseFile, fmCreate);
+    S.Write(pointer(RS)^,sz);
+  finally
+    S.Free;
+  end;
+// конец генератора лицензии
+//*****************************
+}
+  // читаем лицензию из файла
+  // ReadLicense(LicenseFile, License);
+  try
+    S := TFileStream.Create(LicenseFile,fmOpenRead);
+    sz := S.Size;
+    SetLength(RS, sz);
+    S.Read(pointer(RS)^,sz);
+    CryptStringToBinary(pointer(RS), Length(RS), Flags, pointer(License), sz, skip, Flags);
+    S.Free;
+    License^.Active := (CompareDateTime(Now, License^.DateStart) >= 0) and
+                       (CompareDateTime(License^.DateEnd, Now) >= 0);
+    // простроченная дата лицензии
+    if not License^.Active then begin
+      if ShowLicenseDlg(License) then begin
+        //EventType оставляем из старой лицензии
+      end
+      else begin
+        License^.Active := false;
+        HistoryListBox.Lines.Add(LICENSEEXPIREDMSG);
+      end;
+    end;
+  except
+    // если проблема с чтением лицензии
+    with License^ do begin
+      DateStart := Date;
+      DateEnd:= Date;
+      Owner := 'Optimus';
+      Number := 'free';
+      QtyLicense := 1;
+      EventType := [FS4];
+      Active := false;
+    end;
+    HistoryListBox.Lines.Add(LICENSEMSG);
+  end;
+  MAXPORTS := License^.QtyLicense;
+
+  FormID := Main_GUID;
+  Caption := APPLICATIONCAPTION;
+  StatusBar1.Panels[0].Text := Format(APPVERSIONNUMBER,[AppVersion(Application.ExeName)]);
+
+  // загружаем фоновую картинку на главной форме
   if FileExists(PicFileName) then
     try
       jp := TJpegImage.Create;
@@ -349,65 +407,15 @@ begin
           BackgoundPic.Free;
     end;
 
-//*****************************
-// Создаем лицензию
-//*****************************
-  GetMem(License, SizeOf(TLicense));
+  HistoryListBox.Lines.Add(Format(MONITORCOUNTMSG, [DateTimeToStr(Now),Screen.MonitorCount]));
+  for j := 0 to High(MonList) do   // прочитать разрешение всех подключенных экранов
+    with MonList[j] do
+      HistoryListBox.Lines.Add(Format(MONITORRESMSG, [DateTimeToStr(Now),j,h,dc,r.Left,r.Top,r.Right,r.Bottom]));
 
-{
-//*****************************
- // создаем и сохраняем лицензию в файл
-  Flags := CRYPT_STRING_BASE64REQUESTHEADER;
-  DecodeDate(Now, Year, Month, Day);
-  with License^ do begin
-//    DateStart := EncodeDateTime(Year,Month,Day,0,0,0,0);
-    DateStart := EncodeDateTime(LIC_YEAR1,LIC_MONTH1,LIC_DAY1,0,0,0,0);
-    DateEnd := EncodeDateTime(LIC_YEAR2,LIC_MONTH2,LIC_DAY2,0,0,0,0); // YEAR,MONTH,DAY,HOUR,MINUTE,SECOND,MS
-    Number := LIC_NUMBER;
-    QtyLicense := LIC_QTY;
-    EventType := LIC_TYPE;
-    Owner := LIC_OWNER;
-  end;
-
-  S := TFileStream.Create(LicenseFile, fmCreate);
-  try
-    CryptBinaryToString(pointer(License), SizeOf(License^), Flags, nil, sz);
-    SetLength(RS, sz);
-    CryptBinaryToString(pointer(License), SizeOf(License^), Flags, pointer(RS), sz);
-    S.Write(pointer(RS)^,sz);
-  finally
-    S.Free;
-  end;
-// конец генератора лицензии
-}
-//*****************************
-
-  // читаем лицензию из файла
-  try
-    S := TFileStream.Create(LicenseFile,fmOpenRead);
-    sz := S.Size;
-    SetLength(RS, sz);
-    S.Read(pointer(RS)^,sz);
-    CryptStringToBinary(pointer(RS), Length(RS), Flags, pointer(License), sz, skip, Flags);
-    S.Free;
-    // простроченная дата лицензии
-    Randomize;
-    if CompareDateTime(Now, License^.DateStart) +
-       CompareDateTime(License^.DateEnd, Now) < 2 then begin
-      License^.Active := false;
-      TDelayThr.Create(TForm(fMain), Random(FALSELICENSETIME)*1000);
-      MAXPORTS := 1;
-    end
-    else begin
-      MAXPORTS := License^.QtyLicense;
-      License^.Active := true;
-    end;
-  except
-    // если проблема с чтением лицензии
-    Randomize;
-    License^.Active := false;
-    TDelayThr.Create(TForm(fMain), Random(FALSELICENSETIME)*1000);
-  end;
+  R := TCnRawKeyBoard.Create(Self);
+  R.OnRawKeyDown := RawKeyDown;
+  R.OnRawKeyUp := RawKeyUp;
+  CanJudge := false;
 end;
 
 procedure TfMain.N9Click(Sender: TObject);
@@ -537,7 +545,6 @@ begin
   if CompareDateTime(Now, License^.DateStart) +
      CompareDateTime(License^.DateEnd, Now) < 2 then begin     //проверяем дату лицензии
        License^.Active := false;
-       TDelayThr.Create(TForm(fMain), Random(FALSELICENSETIME)*1000);
   end
   else
     if OpenForm(Scoring_GUID) then fJudgeCtrl := TfJudgeCtrl.Create(Self);

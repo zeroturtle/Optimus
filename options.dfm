@@ -308,24 +308,6 @@ object fOptions: TfOptions
     Value = 150
     Width = 73
   end
-  object cxSpinEdit1: TcxSpinEdit
-    Left = 216
-    Top = 15
-    Properties.MaxValue = 5.000000000000000000
-    Properties.MinValue = 1.000000000000000000
-    TabOrder = 7
-    Value = 1
-    Width = 73
-  end
-  object cxSpinEdit2: TcxSpinEdit
-    Left = 216
-    Top = 54
-    Properties.MaxValue = 90.000000000000000000
-    Properties.MinValue = 50.000000000000000000
-    TabOrder = 8
-    Value = 70
-    Width = 73
-  end
   object RadioGroup1: TRadioGroup
     Left = 16
     Top = 246
@@ -335,7 +317,7 @@ object fOptions: TfOptions
     Items.Strings = (
       #1053#1072' '#1075#1083#1072#1074#1085#1086#1084' '#1086#1082#1085#1077'  (Main Window)'
       #1053#1072' '#1101#1082#1088#1072#1085#1072#1093' '#1082#1086#1085#1089#1086#1083#1077#1081' (Judges Consol)')
-    TabOrder = 9
+    TabOrder = 7
     OnClick = RadioGroup1Click
   end
   object CheckBox1: TCheckBox
@@ -344,16 +326,34 @@ object fOptions: TfOptions
     Width = 161
     Height = 17
     Caption = #1042#1082#1083#1102#1095#1080#1090#1100' TFTP'
-    TabOrder = 10
+    TabOrder = 8
     WordWrap = True
   end
   object cxSpinEdit7: TcxSpinEdit
     Left = 328
     Top = 288
     Enabled = False
-    TabOrder = 11
+    TabOrder = 9
     Value = 1
     Width = 65
+  end
+  object cxSpinEdit1: TcxSpinEdit
+    Left = 216
+    Top = 16
+    Properties.MaxValue = 5.000000000000000000
+    Properties.MinValue = 1.000000000000000000
+    TabOrder = 10
+    Value = 1
+    Width = 73
+  end
+  object cxSpinEdit2: TcxSpinEdit
+    Left = 216
+    Top = 54
+    Properties.MaxValue = 90.000000000000000000
+    Properties.MinValue = 50.000000000000000000
+    TabOrder = 11
+    Value = 70
+    Width = 73
   end
   object OpenDialog1: TOpenDialog
     DefaultExt = 'avi'

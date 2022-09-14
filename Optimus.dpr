@@ -32,7 +32,9 @@ uses
   JCtrl in 'JCtrl.pas' {fJudgeCtrl},
   Settings in 'Settings.pas' {fSettimgs},
   DMJ in 'DMJ.pas' {DataJudge: TDataModule},
-  iResult in 'iResult.pas' {fIndResult};
+  iResult in 'iResult.pas' {fIndResult},
+  ScoreEdit in 'ScoreEdit.pas' {fScoreEdit},
+  fLicense in 'fLicense.pas' {License_Expired};
 
 {$R *.res}
 
@@ -46,7 +48,5 @@ begin
   Application.CreateForm(TfMain, fMain);
   Application.CreateForm(TDataMain, DataMain);
   Application.CreateForm(TDataJudge, DataJudge);
-  SplashScreen.Hide;
-  SplashScreen.Free;  
   Application.Run;
 end.

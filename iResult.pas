@@ -40,6 +40,7 @@ type
     grdDetailDBTableView1Column9: TcxGridDBColumn;
     grdDetailDBTableView1Column10: TcxGridDBColumn;
     grd_GeneralDBTableView1Column9: TcxGridDBColumn;
+    act_ChangeRecord: TAction;
     procedure FormCreate(Sender: TObject);
     procedure ActionExecute(Sender: TObject);
     procedure grdDetailEnter(Sender: TObject);
@@ -75,32 +76,20 @@ begin
   inherited;
   case TComponent(Sender).Tag of
     10: begin
-         {Получаем алгоритм расчета результата тура и отображения}
-         with DataMain.qryCalcRound do begin
-           Close;
-            SQL.Clear;
-            SQL.Add('SELECT * FROM Type t LEFT JOIN Round r ON (t.Type_ID=r.Round_Type) WHERE r.Round_ID =:Round_ID');
-//            SQL.Add('SELECT t.* FROM Type t LEFT JOIN Round r ON (t.Type_ID=r.Round_Type) LEFT JOIN RoundResult rr ON (rr.Round_ID=r.Round_ID) WHERE rr.Result_ID =:Result_ID');            
-            Params[0].AsInteger := DataMain.tblMemberResultRound_ID.AsInteger;
-           Open;
-           // проверка разрешенного типа соревнования
-           if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) and
-              (License^.Active)  then  begin
-             License^.Active := false;
-             TDelayThr.Create(TForm(fMain), Random(FALSELICENSETIME)*1000);
-           end;
-         end;
-         { Подсчитать результат тура }
-          with DataMain.qryCalcResult do begin
-            Close;
-            SQL.Clear;
-            SQL.Add( DataMain.qryCalcRound.FieldByName('Calc').Value );
-            Params[0].AsInteger := DataMain.tblMemberResultResult_ID.AsInteger;
-            ExecSQL;
+        with TABSQuery.Create(Self) do
+          try
+            DatabaseName :=  'dbJudge';
+            if DataMain.qryGetQuery.Locate('Query_ID',17,[]) then begin
+              SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
+              SQL.DelimitedText := StringReplace(SQL.DelimitedText,'MEMORY','',[rfReplaceAll,rfIgnoreCase]);
+              Params[0].AsInteger := DataMain.tblMemberResultResult_ID.AsInteger;
+              ExecSQL;
+            end;
+          finally
+            Free;
           end;
-          ReOpenDataset(ds_General.DataSet);
-          DataMain.qryCalcRound.Close;
-        end;
+        ReOpenDataset(ds_General.DataSet);
+    end;
   end;
 end;
 

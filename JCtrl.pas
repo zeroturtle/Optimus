@@ -21,7 +21,7 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(F: TForm; Msg : String = ATTANTIONMSG);
+    constructor Create(F: TForm; Msg : String);
   end;
 
   TUndoPoint = record
@@ -630,7 +630,7 @@ begin
 
         // добавляем оценку в базу
         //!! Как узнать Judge_ID монитора
-        DataJudge.tblViewDetail.AppendRecord([ROUNDID,Scan.Port,i,Point,Time,1{Judge_ID},getErrorID(Trim(PortState[Scan.Port].Scores[i].Err))]);
+        DataJudge.tblViewDetail.AppendRecord([ROUNDID,Scan.Port,i,Point,Time,getErrorID(Trim(PortState[Scan.Port].Scores[i].Err))]);
         inc(Result);
     end
     else break;
@@ -648,7 +648,7 @@ begin
       PortState[Code.Port].JudgeCall := PortState[Code.Port].JudgeCall xor JC_REPEAT;
       Reset;
       end;
-    else ;
+    else TInfoThr.Create(PortState[Code.Port].Form,ATTANTIONMSG);
   end;
 end;
 
@@ -691,7 +691,7 @@ begin
         begin
           btnSaveClick(nil);
         end;
-      else ;
+      else TInfoThr.Create(PortState[Code.Port].Form,ATTANTIONMSG);
     end;
 end;
 
@@ -705,7 +705,7 @@ begin
       VK_NUMPAD1..VK_NUMPAD9:
       	Scores[Sequence].Err :=
            PErrorRec(ErrorList.Objects[Code.Key-VK_NUMPAD0]).Code;
-      else ; //TInfoThr.Create(AForms[Code.Port]);
+      else TInfoThr.Create(PortState[Code.Port].Form,ATTANTIONMSG);
     end;
 end;
 
@@ -759,7 +759,7 @@ begin
                     with PortState[Code.Port] do SwapVars2(Scores[rs], PScores[rs], SizeOf(TPoint));
                   SetLength(Undo[Code.Port], 0);
                 end;
-    else ;
+    else TInfoThr.Create(PortState[Code.Port].Form,ATTANTIONMSG);
   end; //case
 end;
 
@@ -1049,14 +1049,15 @@ begin
       with DataMain do begin
         //Подсчитать результат тура - результат записывается в RoundResult !!!
         qryCalcResult.ExecSQL;
-        ReOpenDataset(tblTeamRound);
-        with tblTeamRound do
+{        with tblTeamRound do
           if Locate('Result_ID',ROUNDID,[]) then begin
             Edit;
             FieldByName('StartTime').AsInteger  := StartTime;
-            FieldByName('ViewNumber').AsInteger := View;
+//            FieldByName('ViewNumber').AsInteger := View;
             Post;
           end;
+}
+        ReOpenDataset(tblTeamRound);
       end;
 
       {вывести ведомость оценок на экран}
@@ -1309,7 +1310,6 @@ end;
 procedure TfJudgeCtrl.FormClose(Sender: TObject; var Action: TCloseAction);
 var i: integer;
 begin
-  DataMain.qryCalcRound.Close;
   with DataJudge do begin
     qryList.Close;
     tblViewDetail.EmptyTable;
@@ -1846,59 +1846,68 @@ begin
     RoundName:= qryList.FieldByName('Round_Num').AsString;
     VideoFileName := VIDEODIRECTORY+qryList.FieldByName('VideoFile').AsString;
   end;
-  {Получаем алгоритм расчета результата тура и отображения}
-  with DataMain.qryCalcRound do begin
-     Close;
-     SQL.Clear;
-     SQL.Add('SELECT t.*, tsk.Columns, tsk.MQP FROM RoundResult rr LEFT JOIN Round r ON (rr.Round_ID=r.Round_ID)');
-     SQL.Add('LEFT JOIN Type t ON (t.Type_ID=r.Round_Type) LEFT JOIN Task tsk ON (tsk.Type_ID=r.Round_Type)');
-     SQL.Add('WHERE rr.Result_ID =:Result_ID');
-     Params[0].AsInteger := ROUNDID;
-     Open;
-     POINTMASK := FieldByName('Mask').Value;
-     MAXPOINTS := Length(POINTMASK);
-     MINPOINTS := FieldByName('MQP').Value;
-     ColumnsName.CommaText := FieldByName('Columns').AsString;
+  with TABSQuery.Create(Self) do begin
+    try
+      DatabaseName :=  'dbJudge';
+      SQL.Add('SELECT t.Type_ID, t.Name, t.ShortName, t.Mask, t.Proto, tsk.Columns, tsk.MQP');
+      SQL.Add('FROM RoundResult rr LEFT JOIN Round r ON (rr.Round_ID=r.Round_ID)');
+      SQL.Add('LEFT JOIN Type t ON (t.Type_ID=r.Round_Type) LEFT JOIN Task tsk ON (tsk.Type_ID=r.Round_Type)');
+      SQL.Add('WHERE rr.Result_ID =:Result_ID');
+      Params[0].AsInteger := ROUNDID;
+      Open;
+      POINTMASK := FieldByName('Mask').Value;
+      MAXPOINTS := Length(POINTMASK);
+      MINPOINTS := FieldByName('MQP').Value;
+      ColumnsName.CommaText := FieldByName('Columns').AsString;
+      Close;
+      // проверка разрешенного типа соревнования
+      if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) and
+         (License^.Active) then begin
+        ShowMessage('Тип отсутствует в списке лицензии');
+      {  Randomize;
+        fCopyright := TfCopyright.Create(Self);
+        TDelayThr.Create(TForm(fCopyright), Random(FALSELICENSETIME)*1000);
+        fCopyright.ShowModal;
+        fCopyright.Free;}
+      end;
+    finally
+      Free;
+    end;
+  end;
 
    { Запрос рассчета результат тура }
-      with DataMain.qryCalcResult do begin
-        SQL.Clear;
-        SQL.Add( DataMain.qryCalcRound.FieldByName('Calc').Value );
-        Params[0].AsInteger := ROUNDID;
-      end;
+    //для Points=14, Times=15, Errors=16, Calc=17
+    with DataMain.qryCalcResult do begin
+      SQL.Clear;
+      if DataMain.qryGetQuery.Locate('Query_ID',17,[]) then
+         SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
+      Params[0].AsInteger := ROUNDID;
+    end;
 
-    {запросы ведомостей оценок, времени и ошибок}
-      with DataJudge.qryScore do begin
-        SQL.Clear;
-        SQL.Add( DataMain.qryCalcRound.FieldByName(VIEWOPTIONLIST[0].Field).Value );
-        for j := 0 to ParamCount-1 do
-          Params[j].AsInteger := ROUNDID;
-      end;
-      with DataJudge.qryTime do begin
-        SQL.Clear;
-        SQL.Add( DataMain.qryCalcRound.FieldByName(VIEWOPTIONLIST[1].Field).Value );
-        for j := 0 to ParamCount-1 do
-          Params[j].AsInteger := ROUNDID;
-      end;
-      with DataJudge.qryError do begin
-        SQL.Clear;
-        SQL.Add( DataMain.qryCalcRound.FieldByName(VIEWOPTIONLIST[2].Field).Value );
-        for j := 0 to ParamCount-1 do
-          Params[j].AsInteger := ROUNDID;
-      end;
-
-     // проверка разрешенного типа соревнования
-     if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) and
-        (License^.Active) then  begin
-       License^.Active := false;
-       TDelayThr.Create(TForm(fMain), Random(FALSELICENSETIME)*1000);
-     end;
-  end;
+  {запросы ведомостей оценок, времени и ошибок}
+    with DataJudge.qryScore do begin
+      SQL.Clear;
+      if DataMain.qryGetQuery.Locate('Query_ID',14,[]) then
+         SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
+      for j := 0 to ParamCount-1 do Params[j].AsInteger := ROUNDID;
+    end;
+    with DataJudge.qryTime do begin
+      SQL.Clear;
+      if DataMain.qryGetQuery.Locate('Query_ID',15,[]) then
+         SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
+      for j := 0 to ParamCount-1 do Params[j].AsInteger := ROUNDID;
+    end;
+    with DataJudge.qryError do begin
+      SQL.Clear;
+      if DataMain.qryGetQuery.Locate('Query_ID',16,[]) then
+         SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
+      for j := 0 to ParamCount-1 do Params[j].AsInteger := ROUNDID;
+    end;
 
   for i := 0 to High(PortState) do begin
     // Показывает состояние только подключенные консолей
     TLabel(FindComponent('lbPoint'+IntToStr(i+1))).Visible := true;
-    with PortState[i] do begin
+    with PortState[i] do
       if Form = nil then begin
         Form := TfJudgeConsol.Create(Self);
         with TfJudgeConsol(Form) do begin
@@ -1910,7 +1919,6 @@ begin
           Show;
         end;
       end;
-    end;
   end;
 
   // заставляем TScreen обновить списки
@@ -1926,6 +1934,7 @@ begin
 
     VideoPartStart := 0;
     VideoPartEnd := FDuration;
+    Log.Add(Format(REVIEWFRAMEMSG,[VideoPartStart,VideoPartEnd]));    
     Reset;
   end
   else
@@ -1951,6 +1960,7 @@ begin
 
     VideoPartEnd := StartTime + MAXTIME * 1000000;
     if VideoPartEnd > FDuration then VideoPartEnd := FDuration;
+    Log.Add(Format(REVIEWFRAMEMSG,[VideoPartStart,VideoPartEnd]));
     Reset;
   end
   else
@@ -1994,10 +2004,17 @@ procedure TfJudgeCtrl.btnSaveClick(Sender: TObject);
 begin
    {сохранить результат в базу}
   with TABSQuery.Create(Self) do begin
-    SQL.Add('INSERT INTO ViewDetail SELECT * FROM MEMORY ViewDetail; DELETE FROM MEMORY ViewDetail;');
-    SQL.Add('INSERT INTO ResultDetail SELECT * FROM MEMORY ResultDetail; DELETE FROM MEMORY ResultDetail;');
-    DatabaseName := 'dbJudbge';
+    SQL.Add('INSERT INTO ViewDetail SELECT v.*, jr.Judge_ID FROM MEMORY ViewDetail v ');
+    SQL.Add('LEFT JOIN (SELECT Result_ID, Judge_ID, Port-1 Monitor, IsTrainee FROM RoundResult r, Judges j ');
+    SQL.Add(' WHERE Port IS NOT NULL AND r.Competition_ID=j.Competition_ID  AND r.Result_ID=:Result_ID) jr ON (v.Monitor=jr.Monitor);');
+    SQL.Add('INSERT INTO ResultDetail SELECT * FROM MEMORY ResultDetail;');
+    SQL.Add('DELETE FROM MEMORY ViewDetail; DELETE FROM MEMORY ResultDetail;');
+    SQL.Add('UPDATE RoundResult rr SET JudgeTime=Now, StartTime = :StartTime WHERE rr.Result_ID=:Result_ID');
+    DatabaseName := 'dbJudge';
     DataSource := DataMain.dsComp;
+    Params[0].AsInteger := ROUNDID;
+    Params[1].AsInteger := StartTime;
+    Params[2].AsInteger := ROUNDID;
     ExecSQL;
     Free;
   end;

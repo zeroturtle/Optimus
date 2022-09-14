@@ -1,6 +1,6 @@
 object fd_Pool: Tfd_Pool
-  Left = 804
-  Top = 358
+  Left = 966
+  Top = 213
   BorderStyle = bsSingle
   Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082' '#1092#1080#1075#1091#1088
   ClientHeight = 501
@@ -241,7 +241,8 @@ object fd_Pool: Tfd_Pool
           'WindowState')
       end>
     StorageName = 'Software\Optimus\Pool'
+    StorageType = stRegistry
     Left = 256
-    Top = 88
+    Top = 80
   end
 end

@@ -16,7 +16,6 @@ type
     Label3: TLabel;
     Label4: TLabel;
     OpenDialog1: TOpenDialog;
-    cxSpinEdit1: TcxSpinEdit;
     cxSpinEdit3: TcxSpinEdit;
     DirectoryEdit1: TDirectoryEdit;
     Panel3: TPanel;
@@ -31,7 +30,6 @@ type
     Label10: TLabel;
     cxSpinEdit6: TcxSpinEdit;
     Label2: TLabel;
-    cxSpinEdit2: TcxSpinEdit;
     RadioGroup1: TRadioGroup;
     Button1: TButton;
     CheckBox1: TCheckBox;
@@ -58,6 +56,8 @@ type
     cxDBLookupComboBox3: TcxDBLookupComboBox;
     Label19: TLabel;
     cxSpinEdit7: TcxSpinEdit;
+    cxSpinEdit1: TcxSpinEdit;
+    cxSpinEdit2: TcxSpinEdit;
     procedure Panel1DragOver(Sender, Source: TObject; X, Y: Integer;
       State: TDragState; var Accept: Boolean);
     procedure RxDBComboEdit1ButtonClick(Sender: TObject);
@@ -95,8 +95,6 @@ end;
 
 procedure TfOptions.FormCreate(Sender: TObject);
 begin
-  // не позволять запускать больше портов чем в лицензии
-  cxSpinEdit1.Properties.MaxValue := License^.QtyLicense;
   OptionsList.Clear;
   cxSpinEdit1.Value := MAXPORTS;
   cxSpinEdit2.Value := PLAYBACKSPEED;
@@ -114,7 +112,11 @@ end;
 
 procedure TfOptions.btnOKClick(Sender: TObject);
 begin
-  MAXPORTS := cxSpinEdit1.Value;
+  // не позволять запускать больше портов чем в лицензии
+  if (cxSpinEdit1.Value>License^.QtyLicense) or (cxSpinEdit1.Value<1) then
+    MAXPORTS := License^.QtyLicense
+  else
+    MAXPORTS := cxSpinEdit1.Value;
   PLAYBACKSPEED := cxSpinEdit2.Value;
   CONCENSUSTIME := cxSpinEdit3.Value;
 //  PUSHPROTECTPERIOD := cxSpinEdit4.Value;

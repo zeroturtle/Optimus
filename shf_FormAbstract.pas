@@ -118,7 +118,7 @@ var
 
 implementation
 
-uses constant;
+uses constant, wthread;
 
 {$R *.dfm}
 

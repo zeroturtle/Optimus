@@ -23,12 +23,6 @@ object fMain: TfMain
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Image1: TImage
-    Left = 536
-    Top = 160
-    Width = 105
-    Height = 105
-  end
   object StatusBar1: TStatusBar
     Left = 0
     Top = 268

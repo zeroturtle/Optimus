@@ -49,11 +49,14 @@ begin
   inherited;
 end;
 
+
 // расчет рейтинга судьи
 function JudgeRating: TStringList;
 var i : integer;
     s : string;
 begin
+(*
+  Result := TStringList.Create;
     try
      {Получаем количество оценок тура}
       with DataMain.qryCalcRound do begin
@@ -66,7 +69,6 @@ begin
       end;
 
   // Это SQL-запрос для рейтинга судей по соревнованию
-    Result := TStringList.Create;
     with Result do begin
       Add('SELECT A.Judge_ID, AVG(ROUND(');
       for i := 1 to MAXPOINTS do begin
@@ -107,6 +109,7 @@ begin
     finally
 //      SQLstring.Free;
     end;
+*)
 end;
 
 procedure TfJudge.ActionExecute(Sender: TObject);
@@ -115,7 +118,7 @@ begin
   case TComponent(Sender).Tag of
     11: begin
       // пересчитать рейтинг судьи
-      with DataMain.qryCalcResult do begin
+{      with DataMain.qryCalcResult do begin
         Close;
         SQL.Assign(JudgeRating); //JudgeRating;
         Params[0].AsInteger := DataMain.tblCompetitionCompetition_ID.Value;
@@ -133,6 +136,7 @@ begin
         DataMain.tblJudge.EnableControls;
       end;
       ReOpenDataset(ds_General.DataSet);
+}
     end;
   end;
 end;

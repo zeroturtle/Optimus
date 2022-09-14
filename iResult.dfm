@@ -168,6 +168,13 @@ inherited fIndResult: TfIndResult
     inherited act_Calc: TAction
       OnExecute = ActionExecute
     end
+    object act_ChangeRecord: TAction
+      Category = 'DB'
+      Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1086#1094#1077#1085#1082#1091
+      Hint = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1086#1094#1077#1085#1082#1091
+      ImageIndex = 17
+      OnExecute = ActionExecute
+    end
   end
   inherited cxPropertiesStore1: TcxPropertiesStore
     Components = <

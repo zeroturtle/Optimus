@@ -63,7 +63,6 @@ begin
     Filtered := true;
     if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then  begin
       License^.Active := false;
-      TDelayThr.Create(TForm(fMain), Random(FALSELICENSETIME)*1000);
     end;
     try
       with OptionsList do begin

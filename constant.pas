@@ -45,126 +45,116 @@ const
 
 resourcestring
 //  Все надписи в программе
-      APPLICATIONCAPTION = 'OPTIMUS';
-      APPNAME      = 'Система электронного судейства';
-      APPCONTRIB   = 'При поддержке ДЗ Майское (Днепропетровск, Украина)';
-      APPVERSIONNUMBER = 'Версия: %s';
-      APPCOPYRIGHT = 'Автор ©: 2009 - 2022  Александр Ткаченко';
+  APPLICATIONCAPTION = 'OPTIMUS';
+  APPNAME      = 'Система электронного судейства';
+  APPCONTRIB   = 'При поддержке ДЗ Майское (Днепропетровск, Украина)';
+  APPVERSIONNUMBER = 'Версия: %s';
+  APPCOPYRIGHT = 'Автор ©: 2009 - 2022  Александр Ткаченко';
 
 // сообщения в журнал работы программы
-      FALSESTARTMSG   = '%s Несинхронный запуск таймера Монитор №%d (%s) : %.0f мс';
-      CONFIRMMSG      = 'Дождитесь подсчета результата!';
-      SAVESCORESMSG   = '%s Запись результатов порта %d (%s)';
-      MONITORCOUNTMSG = '%s Количество подключенных мониторов %d';
-      INVITEPORTMSG   = 'Нажмите номер консоли, цифру от 1 до %d';
-      MONITORRESMSG   = '%s Monitor# %d hMon: %x HDC: %x Left: %d Top: %d Right: %d Bottom: %d';
-      APPCLOSEMSG     = 'Завершить работу программы?';
-      KEYPRESSMSG     = '%s порт %d нажал кнопку %d в %f';
-      STARTTIMEMSG    = 'Время старта рабочего времени %d';
-      CONSACTIVATEDMSG= 'Keyboard #%d activated';
-      CHANGEMODEMSG   = '%s утановлен режим %s для порта %d';
-      REVIEWFRAMEMSG  = 'Установлен просмотра фрагмента от %d до %d ';
-      REVIEWMSG       = '%s Просмотр №%d';
-      PLAYBACKSPEEDMSG= 'Скорость просмотра %.0f%%';
-      CLOSEMSG        = '%s Закончили оценку';
-      BREAKMSG        = '%s Досрочный выход';
-      PENALTYMSG      = 'Порт %d поставил штраф за невидность отделения';
-      EMPTYLISTMSG    = 'Нет доступных записей для просмотра';
-      PENALTYERRORMSG = 'ВНИМАНИЕ!  Укажите причину штрафа';
-      MAXVALUEERRORMSG= 'ВНИМАНИЕ!  Обнаружена оценка больше допустимого значения %d';
-      MINPOINTSERRORMSG= 'ВНИМАНИЕ!  Количество оценок меньше допустимого %d';
-      CONSNUMERRORMSG = 'Недопустимый номер судейской консоли (%d)';
+  FALSESTARTMSG   = '%s Несинхронный запуск таймера Монитор №%d (%s) : %.0f мс';
+  CONFIRMMSG      = 'Дождитесь подсчета результата!';
+  SAVESCORESMSG   = '%s Запись результатов порта %d (%s)';
+  MONITORCOUNTMSG = '%s Количество подключенных мониторов %d';
+  INVITEPORTMSG   = 'Нажмите номер консоли, цифру от 1 до %d';
+  MONITORRESMSG   = '%s Monitor# %d hMon: %x HDC: %x Left: %d Top: %d Right: %d Bottom: %d';
+  APPCLOSEMSG     = 'Завершить работу программы?';
+  KEYPRESSMSG     = '%s порт %d нажал кнопку %d в %f';
+  STARTTIMEMSG    = 'Время старта рабочего времени %d';
+  CONSACTIVATEDMSG= 'Keyboard #%d activated';
+  CHANGEMODEMSG   = '%s утановлен режим %s для порта %d';
+  REVIEWFRAMEMSG  = 'Установлен просмотра фрагмента от %d до %d ';
+  REVIEWMSG       = '%s Просмотр №%d';
+  PLAYBACKSPEEDMSG= 'Скорость просмотра %.0f%%';
+  CLOSEMSG        = '%s Закончили оценку';
+  BREAKMSG        = '%s Досрочный выход';
+  PENALTYMSG      = 'Порт %d поставил штраф за невидность отделения';
+  EMPTYLISTMSG    = 'Нет доступных записей для просмотра';
+  PENALTYERRORMSG = 'ВНИМАНИЕ!  Укажите причину штрафа';
+  MAXVALUEERRORMSG= 'ВНИМАНИЕ!  Обнаружена оценка больше допустимого значения %d';
+  MINPOINTSERRORMSG= 'ВНИМАНИЕ!  Количество оценок меньше допустимого %d';
+  CONSNUMERRORMSG = 'Недопустимый номер судейской консоли (%d)';
+  ATTANTIONMSG   = 'Функция не поддерживается';
+  LICENSEMSG     = 'Ошибка чтения лицензии';
+  LICENSEEXPIREDMSG= 'Используется простроченная лицензия';
 
-      RESULTTIME    = 'Время установки %d позиции: %.2f сек';
-      CONSOLTITLE   = 'Судейская консоль № %d (%s)';
-      REQUESTSTRING = 'Установленные запросы: ';
-      TABLESTRINGS  = 'Фигуры,Оценки,Ошибки';
-      JUDGINGTITLE  = '%s '+CR+'Тур №%s, команда %s'+CR+'%s';
+  CONSOLACTIVE   = 'Пульты активны';
+  CONSOLINACTIVE = 'Пульты выключены';
+
+  RESULTTIME    = 'Время установки %d позиции: %.2f сек';
+  CONSOLTITLE   = 'Судейская консоль № %d (%s)';
+  REQUESTSTRING = 'Установленные запросы: ';
+  TABLESTRINGS  = 'Фигуры,Оценки,Ошибки';
+  ERRORITEM0     = 'Убрать ошибку';
+  JUDGINGTITLE  = '%s '+CR+'Тур №%s, команда %s'+CR+'%s';
 
 // Меню судейской консоли
-      MAINMENUITEM0 = 'Отменить крайнее изменение';
-      MAINMENUITEM1 = 'Показать жеребьевку';
-      MAINMENUITEM2 = 'Не видно отделения (штраф -20)';
-      MAINMENUITEM3 = 'Запрос фрагмента';
-      MAINMENUITEM4 = 'Указание ошибки "Пропуск фигуры или перехода"';
-      MAINMENUITEM5 = 'Сохранить результат';
-      MAINMENUITEM6 = 'Поменять оценки с предыдущим просмотром с текущим';
+  MAINMENUITEM0 = 'Отменить крайнее изменение';
+  MAINMENUITEM1 = 'Показать жеребьевку';
+  MAINMENUITEM2 = 'Не видно отделения (штраф -20)';
+  MAINMENUITEM3 = 'Запрос фрагмента';
+  MAINMENUITEM4 = 'Указание ошибки "Пропуск фигуры или перехода"';
+  MAINMENUITEM5 = 'Сохранить результат';
+  MAINMENUITEM6 = 'Поменять оценки с предыдущим просмотром с текущим';
 
-      SCORINGMENUITEM0 = 'Просмотр на стандартной скорости';
-      SCORINGMENUITEM1 = 'Просмотр на замедленной скорости';
+  SCORINGMENUITEM0 = 'Просмотр на стандартной скорости';
+  SCORINGMENUITEM1 = 'Просмотр на замедленной скорости';
 
-      CONFIRMMENUITEM0 = 'Повторный просмотр';
-      CONFIRMMENUITEM1 = 'Просмотр фрагмента';
-      CONFIRMMENUITEM2 = 'Редактор результата';
-      CONFIRMMENUITEM3 = 'Сохранить результат';
-      CONFIRMMENUITEM4 = 'Показать оценки результата';
-      CONFIRMMENUITEM5 = 'Показать время результата';
-      CONFIRMMENUITEM6 = 'Показать ошибки результата';
+  CONFIRMMENUITEM0 = 'Повторный просмотр';
+  CONFIRMMENUITEM1 = 'Просмотр фрагмента';
+  CONFIRMMENUITEM2 = 'Редактор результата';
+  CONFIRMMENUITEM3 = 'Сохранить результат';
+  CONFIRMMENUITEM4 = 'Показать оценки результата';
+  CONFIRMMENUITEM5 = 'Показать время результата';
+  CONFIRMMENUITEM6 = 'Показать ошибки результата';
 
-      CONTROLMENU0 = 'Просмотр видео';
-      CONTROLMENU1 = 'Выбрать консоль запуска таймера ';
-      CONTROLMENU2 = 'Указать скорость просмотра ';
-      CONTROLMENU3 = 'Просмотр фрагмента с ';
-      CONTROLMENU4 = 'Просмотр фрагмента по ';
-      CONTROLMENU5 = 'Редактировать оценки';
-      CONTROLMENU6 = 'Сохранить результаты';
+  CONTROLMENU0 = 'Просмотр видео';
+  CONTROLMENU1 = 'Выбрать консоль запуска таймера ';
+  CONTROLMENU2 = 'Указать скорость просмотра ';
+  CONTROLMENU3 = 'Просмотр фрагмента с ';
+  CONTROLMENU4 = 'Просмотр фрагмента по ';
+  CONTROLMENU5 = 'Редактировать оценки';
+  CONTROLMENU6 = 'Сохранить результаты';
 
-      JUDGECALL0     = 'Нет';
-      JUDGECALL1     = 'Повторный просмотр';
-      JUDGECALL2     = 'Просмотр фрагмента';
-      JUDGECALL3     = 'Штраф оператора';
-      JUDGECALL4     = 'Ситуация NV';
+  JUDGECALL0     = 'Нет';
+  JUDGECALL1     = 'Повторный просмотр';
+  JUDGECALL2     = 'Просмотр фрагмента';
+  JUDGECALL3     = 'Штраф оператора';
+  JUDGECALL4     = 'Ситуация NV';
 
-      VIEWOPTIONITEM1 = 'Оценки';
-      VIEWOPTIONITEM2 = 'Время';
-      VIEWOPTIONITEM3 = 'Ошибки';
+// начало Cristal
+  ANSWERNAME   = 'Answer';
+  CLOSETESTMSG = 'Закончить тест?';
 
-      CONSOLACTIVE   = 'Пульты активны';
-      CONSOLINACTIVE = 'Пульты выключены';
-
-      ERRORITEM0     = 'Убрать ошибку';
-      // меню ошибок хранится в БД для каждого Type_ID
-
-  // начало Cristal
-      ANSWERNAME   = 'Answer';
-      CLOSETESTMSG = 'Закончить тест?';
-
-      RESULTLINE1 = 'Ваш результат';
-      RESULTLINE2 = 'Необходимо';
-      RESULTLINE3 = 'Результат теста: %s';
-      RESULTLINE4 = 'Время теста: %s';
-      RESULTLINE5 = 'Осталось: %s';
-  // конец Cristal
+  RESULTLINE1 = 'Ваш результат';
+  RESULTLINE2 = 'Необходимо';
+  RESULTLINE3 = 'Результат теста: %s';
+  RESULTLINE4 = 'Время теста: %s';
+  RESULTLINE5 = 'Осталось: %s';
+// конец Cristal
 
 const
-      ATTANTIONMSG   = 'Функция не поддерживается';
-
   // параметры командной строки
-      cmdDatabase = '-database';  //  задает файл БД
-      cmdLicense  = '-license';   //  задает файл лицензии
-      cmdWallpaper = '-picture';  //  задает фоновую картинку
-      cmdLogFile  = '-logfile';   //  задает файл журналирования
-      cmdMultiuser = '-multiuser';
-      cmdHelp = '-help';
-      cmdDatabaseShort = '-d';
-      cmdLicenseShort  = '-l';
-      cmdWallpaperShort = '-p';
-      cmdLogFileShort  = '-f';
-      cmdMultiuserShort = '-m';
-      cmdHelpShort = '-h';
+  cmdDatabase = '-database';  //  задает файл БД
+  cmdLicense  = '-license';   //  задает файл лицензии
+  cmdWallpaper = '-picture';  //  задает фоновую картинку
+  cmdLogFile  = '-logfile';   //  задает файл журналирования
+  cmdMultiuser = '-multiuser';
+  cmdHelp = '-help';
+  cmdDatabaseShort = '-d';
+  cmdLicenseShort  = '-l';
+  cmdWallpaperShort = '-p';
+  cmdLogFileShort  = '-f';
+  cmdMultiuserShort = '-m';
+  cmdHelpShort = '-h';
 
-HELPCONTENT = cmdDatabaseShort+'  файл БД'+ CR +
-              cmdLicenseShort+' файл лицензии'+ CR +
-              cmdWallpaperShort+' фоновую картинку'+ CR +
-              cmdLogFileShort+' журнал работы'+ CR +
-              cmdMultiuserShort+' многопользовательский режим'+ CR +
-              cmdHelpShort+'  вывод справки';
-{HELPCONTENT = APPLICATIONCAPTION + CR +
-	cmdDatabase+'|'+cmdDatabaseShort+'	файл БД'+ CR +
+HELPCONTENT =
+  cmdDatabase+'|'+cmdDatabaseShort+'	файл БД'+ CR +
 	cmdLicense+'|'+cmdLicenseShort+'		файл лицензии'+ CR +
 	cmdWallpaper+'|'+cmdWallpaperShort+'	фоновую картинку'+ CR +
 	cmdLogFile+'|'+cmdLogFileShort+'		журнал работы'+ CR +
-	cmdHelp+'|'+cmdHelpShort+'		вывод справки';}
+  cmdMultiuserShort+' многопользовательский режим'+ CR +
+	cmdHelp+'|'+cmdHelpShort+'		вывод справки';
 
   Competition_GUID: TGUID = '{37AFF2B2-DE48-4A0A-9336-3A100EB6B3E9}';
   Event_GUID: TGUID       = '{AC34B158-6BD7-439E-AFBD-0578D82C91E2}';
@@ -215,7 +205,6 @@ HELPCONTENT = cmdDatabaseShort+'  файл БД'+ CR +
   _VIDEODIRECTORY = '.\video\';
   _DEFAULTTFTPIP  = '127.0.0.1';
 
-  FALSELICENSETIME = 123;
   PAUSETIME        = 5; // длительность стоп-кадра ожидания крайней оценки, сек
   PAUSECONFIRM     = 1; // ожидание запросов судей после оглашения результатов, мс
 
@@ -224,11 +213,15 @@ HELPCONTENT = cmdDatabaseShort+'  файл БД'+ CR +
   CONFIRMMENULIST: array[0..3] of String  =(CONFIRMMENUITEM0,CONFIRMMENUITEM1,CONFIRMMENUITEM2,CONFIRMMENUITEM3);
   SCORINGMENULIST: array[0..1] of String  =(SCORINGMENUITEM0, SCORINGMENUITEM1);
 
-  VIEWOPTIONLIST : array[0..2] of record Title, Field : string; Width : integer end
+{  VIEWOPTIONLIST : array[0..2] of record Title, Field : string; Width : integer end
                   = ((Title : VIEWOPTIONITEM1; Field : 'Points'; Width : 2),
                      (Title : VIEWOPTIONITEM2; Field : 'Times'; Width : 4),
                      (Title : VIEWOPTIONITEM3; Field : 'Errors'; Width : 2));
 
+      VIEWOPTIONITEM1 = 'Оценки';
+      VIEWOPTIONITEM2 = 'Время';
+      VIEWOPTIONITEM3 = 'Ошибки';
+}
 // Запросы судей
   JC_NONE       = $00;   //ничего
   JC_REPEAT     = $01;

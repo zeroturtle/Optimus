@@ -178,25 +178,6 @@ begin
   end;
 end;
 
-function RoundResult: TStringList;
-begin
-  try
-    Result := TStringList.Create;
-    with Result do begin
-      with DataMain.qryCalcResult do begin
-        Close;
-        SQL.Clear;
-        SQL.Add('SELECT * FROM Type t LEFT JOIN Round r ON (t.Type_ID=r.Round_Type) LEFT JOIN RoundResult rr ON (rr.Round_ID=r.Round_ID) WHERE rr.Result_ID =:Result_ID');
-        Params[0].AsInteger := DataMain.tblTeamRoundResult_ID.AsInteger;
-        Open;
-        Add( FieldByName('Points').AsString );
-        DelimitedText := StringReplace(DelimitedText,'MEMORY','',[rfReplaceAll,rfIgnoreCase]);
-        Close;
-      end;
-    end
-  finally
-  end;
-end;
 
 procedure TfPrint.frxPrintBeginDoc(Sender: TObject);
 var i: Integer;
@@ -222,6 +203,7 @@ begin
 // переоткрыть все наборы данных перед открытием отчетов
 //------------------------------------------------------
   for i := 1 to frxPrint.DataSets.Count do begin
+    frxPrint.DataSets.Items[i-1].DataSet.Close;
     case ANSIIndexStr(frxPrint.DataSets.Items[i-1].DataSetName,
            ['frIndProtokol','frProtokol','frJudgeView','frShilders',
            'frRoundProtokol','frIndVedom','frRoundResult','frCompetition']) of
@@ -231,18 +213,19 @@ begin
       3: Query_ID := 6;
       4: Query_ID := 7;
       5: Query_ID := 8;
+      6: Query_ID := 14;
       7: Query_ID := 9;
-      9: Query_ID := 12;
       else Query_ID := -1;
     end;
     if Query_ID >= 0 then
-        if DataMain.qryGetQuery.Locate('Query_ID',Query_ID,[]) then
-          with TABSQuery(TfrxDBDataset(frxPrint.DataSets.Items[i-1].DataSet).Dataset) do begin
-            Close;
-            SQL.Clear;
-            SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
-          end;
-
+      with TABSQuery(TfrxDBDataset(frxPrint.DataSets.Items[i-1].DataSet).Dataset) do
+        if DataMain.qryGetQuery.Locate('Query_ID',Query_ID,[]) then begin
+          SQL.Clear;
+          SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
+          if Query_ID=6 then
+            SQL.DelimitedText := StringReplace(SQL.DelimitedText,'MEMORY','',[rfReplaceAll,rfIgnoreCase]);
+        end;
+          
     frxPrint.DataSets.Items[i-1].DataSet.Open;
   end;
 end;

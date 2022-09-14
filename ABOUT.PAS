@@ -17,7 +17,9 @@ type
     Logo: TImage;
     ApplicationName: TRxLabel;
     Inform: TMemo;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     procedure GetOSInfo;
     procedure InitializeCaptions;
@@ -28,7 +30,7 @@ function AppVersion(const Filename: string):string;
 
 implementation
 
-uses ShellAPI, constant;
+uses ShellAPI, constant, fLicense;
 
 {$R *.DFM}
 
@@ -114,15 +116,22 @@ begin
     Add(Format(APPVERSIONNUMBER,[AppVersion(Application.ExeName)]));
     Add(APPCOPYRIGHT);
     Add(APPCONTRIB);
-    Add(Format('Лицензия №%s "%s" [%s-%s]',[License.Number, License.Owner,
-                      FormatDateTime('d/m/y',License.DateStart),
-                      FormatDateTime('d/m/y',License.DateEnd)]));
+    Add('');
+    Add('');    
+    Add(Format('Лицензия №: %s',[License^.Number]));
+    Add(Format('Срок действия: %s - %s',[DateToStr(License^.DateStart), DateToStr(License^.DateEnd)]));
+    Add(Format('Владелец: %s',[License^.Owner]));
   end;
 end;
 
 procedure TAboutBox.FormCreate(Sender: TObject);
 begin
   InitializeCaptions;
+end;
+
+procedure TAboutBox.Button1Click(Sender: TObject);
+begin
+  ShowLicenseDlg(License);
 end;
 
 end.

@@ -654,7 +654,7 @@ inherited fCompetition: TfCompetition
   end
   object qryPoolLeft: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
     Left = 136
@@ -662,7 +662,7 @@ inherited fCompetition: TfCompetition
   end
   object qryPoolRight: TABSQuery
     CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudbge'
+    DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = True
     Left = 200
