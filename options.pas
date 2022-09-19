@@ -65,6 +65,7 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure RadioGroup1Click(Sender: TObject);
+    procedure DirectoryEdit1Exit(Sender: TObject);
   private
     { Private declarations }
   public
@@ -163,8 +164,18 @@ begin
   cxSpinEdit7.Enabled := RadioGroup1.ItemIndex = 1;
 end;
 
+procedure TfOptions.DirectoryEdit1Exit(Sender: TObject);
+begin
+  with DirectoryEdit1 do
+  if Text[length(Text)] <> '\' then
+    Text := Text+'\';
+end;
+
+
+
 begin
 
   OptionsList := TStringList.Create;
+
 
 end.

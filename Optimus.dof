@@ -114,7 +114,7 @@ IncludeVerInfo=1
 AutoIncBuild=1
 MajorVer=3
 MinorVer=11
-Release=0
+Release=2
 Build=0
 Debug=0
 PreRelease=0
@@ -126,7 +126,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=nuTerra lab
 FileDescription=Electronic scoring system
-FileVersion=3.11.0.0
+FileVersion=3.11.2.0
 InternalName=
 LegalCopyright=
 LegalTrademarks=

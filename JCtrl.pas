@@ -59,7 +59,6 @@ type
     Button1: TButton;
     Button2: TButton;
     dlDivePool: TDualListDialog;
-    Button3: TButton;
     pnlDraw: TPanel;
     Label4: TLabel;
     DBImage1: TDBImage;
@@ -141,7 +140,6 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure MakeBreakpoint;
     procedure ClearBreakpoint;
-    procedure ReOpenDataset(DataSet: TDataSet);
     function GetScreenHandle: HWND;
   public
     { Public declarations }
@@ -217,35 +215,7 @@ var
   NVErrorNumber: string[6];  // номер ошибки NV
   BeepCount : byte;
 
-
-procedure TfJudgeCtrl.ReOpenDataset(DataSet: TDataSet);
-var
-  Bmk: TBookMark;
-  Tmp: TDataSetNotifyEvent;
-begin
-  Screen.Cursor:= crHourGlass;
-  with DataSet do
-  begin
-    Bmk:= GetBookmark;
-    Tmp:= DataSet.AfterScroll;
-    DataSet.AfterScroll:= nil;
-    DisableControls;
-    Close;
-    try
-      Open;
-      try
-        GotoBookmark(Bmk);
-      except
-      end;
-    finally
-      EnableControls;
-      DataSet.AfterScroll:= Tmp;
-      FreeBookmark(Bmk);
-      Screen.Cursor:= crDefault;
-    end;
-  end;
-end;
-
+  
 // процедура перестановки двух переменных
 procedure SwapVars1(var u, v; Size: Integer);
 var
@@ -604,7 +574,7 @@ var
 begin
 // 0. просмотр фрагмента - удаляем прошлый просмотр
   if Part then
-    fJudgeCtrl.ReOpenDataset(DataJudge.qryList);
+    ReOpenDataset(DataJudge.qryList);
     
 // 1.проверить чтобы общее количество оценок было не меньше MINPOINTS
   if (PortState[Scan.Port].Scores[MINPOINTS-1].Time <= 0) then begin //не поставлена
@@ -1861,9 +1831,8 @@ begin
       ColumnsName.CommaText := FieldByName('Columns').AsString;
       Close;
       // проверка разрешенного типа соревнования
-      if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) and
-         (License^.Active) then begin
-        ShowMessage('Тип отсутствует в списке лицензии');
+      if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then begin
+        ShowMessage(LICENSETYPEMSG);
       {  Randomize;
         fCopyright := TfCopyright.Create(Self);
         TDelayThr.Create(TForm(fCopyright), Random(FALSELICENSETIME)*1000);
@@ -2002,7 +1971,7 @@ end;
 // выходим
 procedure TfJudgeCtrl.btnSaveClick(Sender: TObject);
 begin
-   {сохранить результат в базу}
+   {сохранить результат из Memory в базу}
   with TABSQuery.Create(Self) do begin
     SQL.Add('INSERT INTO ViewDetail SELECT v.*, jr.Judge_ID FROM MEMORY ViewDetail v ');
     SQL.Add('LEFT JOIN (SELECT Result_ID, Judge_ID, Port-1 Monitor, IsTrainee FROM RoundResult r, Judges j ');
@@ -2110,7 +2079,8 @@ end;
 procedure TfJudgeCtrl.Button3Click(Sender: TObject);
 var i : integer;
 begin
-  pnlDraw.Visible := not pnlDraw.Visible;
+(*
+  // показать панель Draw на всех консолях ?!
   for i := 0 to High(PortState) do
     if PortState[i].Form <> nil then //только при судействе
       with TfJudgeConsol(PortState[i].Form) do begin
@@ -2118,6 +2088,7 @@ begin
         Refresh;
       end
     else begin {надо создавать консоли и выводить} end;
+*)
 end;
 
 procedure TfJudgeCtrl.chkVerticalFlipClick(Sender: TObject);

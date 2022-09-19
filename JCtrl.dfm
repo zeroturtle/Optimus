@@ -67,7 +67,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Caption = #1057#1090#1072#1088#1090' '#1088#1072#1073#1086#1095#1077#1075#1086' '#1074#1088#1077#1084#1077#1085#1080
         end
         object Button1: TButton
-          Left = 792
+          Left = 800
           Top = 16
           Width = 110
           Height = 40
@@ -76,22 +76,13 @@ object fJudgeCtrl: TfJudgeCtrl
           OnClick = Button1Click
         end
         object Button2: TButton
-          Left = 924
+          Left = 932
           Top = 16
           Width = 110
           Height = 40
           Caption = #1048#1079#1084#1077#1085#1080#1090#1100' '#1087#1086#1089#1083#1076
           TabOrder = 1
           OnClick = Button2Click
-        end
-        object Button3: TButton
-          Left = 1056
-          Top = 16
-          Width = 110
-          Height = 40
-          Caption = #1055#1086#1082#1072#1079#1072#1090#1100' '#1087#1086#1089#1083#1076
-          TabOrder = 2
-          OnClick = Button3Click
         end
         object btnScoringFirst: TBitBtn
           Left = 224
@@ -100,7 +91,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Height = 40
           Caption = #1055#1088#1086#1089#1084#1086#1090#1088
           Enabled = False
-          TabOrder = 3
+          TabOrder = 2
           OnClick = btnScoringFirstClick
         end
         object StartTimerPorts: TComboBox
@@ -109,7 +100,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Width = 177
           Height = 21
           ItemHeight = 13
-          TabOrder = 4
+          TabOrder = 3
         end
       end
       object grdList: TDBGrid
@@ -324,7 +315,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object DBText1: TDBText
         Left = 0
         Top = 495
-        Width = 303
+        Width = 1341
         Height = 90
         Align = alTop
         Alignment = taCenter
@@ -341,7 +332,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label3: TLabel
         Left = 0
         Top = 0
-        Width = 46
+        Width = 1341
         Height = 13
         Align = alTop
         Caption = #1054#1062#1045#1053#1050#1048
@@ -349,7 +340,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label5: TLabel
         Left = 0
         Top = 330
-        Width = 51
+        Width = 1341
         Height = 13
         Align = alTop
         Caption = #1064#1058#1056#1040#1060#1067
@@ -357,7 +348,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label6: TLabel
         Left = 0
         Top = 165
-        Width = 38
+        Width = 1341
         Height = 13
         Align = alTop
         Caption = #1042#1056#1045#1052#1071
@@ -476,7 +467,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Top = 34
           Width = 137
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 5
           Text = #1053#1072#1095#1072#1083#1086' '#1056#1072#1073'.'#1042#1088#1077#1084#1077#1085#1080
           OnChange = ComboBox1Change
@@ -486,7 +477,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Top = 34
           Width = 137
           Height = 21
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 6
           Text = #1050#1086#1085#1077#1094' '#1056#1072#1073'.'#1042#1088#1077#1084#1077#1085#1080
           OnChange = ComboBox2Change
@@ -503,7 +494,6 @@ object fJudgeCtrl: TfJudgeCtrl
     BorderWidth = 1
     Caption = #1046#1077#1088#1077#1073#1100#1077#1074#1082#1072' '#1090#1091#1088#1072
     TabOrder = 1
-    Visible = False
     object Label4: TLabel
       Left = 2
       Top = 2

@@ -326,7 +326,6 @@ type
     procedure tblRoundNewRecord(DataSet: TDataSet);
     procedure tblRoundUpdateRecord(DataSet: TDataSet;
       UpdateKind: TUpdateKind; var UpdateAction: TUpdateAction);
-    procedure tblRoundAfterOpen(DataSet: TDataSet);
     procedure tblCompetitionCalcFields(DataSet: TDataSet);
     procedure tblCompetitionAfterOpen(DataSet: TDataSet);
     procedure tblMemberBeforeOpen(DataSet: TDataSet);
@@ -360,6 +359,7 @@ type
     procedure tblMemberResultBeforePost(DataSet: TDataSet);
     procedure tblMemberResultBeforeDelete(DataSet: TDataSet);
     procedure tblResultDetail1AfterDelete(DataSet: TDataSet);
+    procedure tblRoundAfterPost(DataSet: TDataSet);
   private
     { Private declarations }
   public
@@ -370,12 +370,43 @@ var
   DataMain: TDataMain;
 
 procedure Explode(var a: array of string; Border, S: string);
+procedure ReOpenDataset(DataSet: TDataSet);
 
 implementation
 
 uses constant;
 
 {$R *.dfm}
+
+procedure ReOpenDataset(DataSet: TDataSet);
+var
+  Bmk: TBookMark;
+  Tmp: TDataSetNotifyEvent;
+//  Cr: TCursor;
+begin
+//  Cr := Screen.Cursor;
+//  Screen.Cursor := crHourGlass;
+  with DataSet do
+  begin
+    Bmk:= GetBookmark;
+    Tmp:= DataSet.AfterScroll;
+    DataSet.AfterScroll:= nil;
+    DisableControls;
+    Close;
+    try
+      Open;
+      try
+        GotoBookmark(Bmk);
+      except
+      end;
+    finally
+      EnableControls;
+      DataSet.AfterScroll:= Tmp;
+      FreeBookmark(Bmk);
+//      Screen.Cursor:= Cr;
+    end;
+  end;
+end;
 
 procedure Explode(var a: array of string; Border, S: string);
 var
@@ -568,7 +599,6 @@ end;
 
 procedure TDataMain.tblRoundNewRecord(DataSet: TDataSet);
 begin
-//  tblRoundCompetition_ID.AsInteger := tblCompetition.FieldByName('Competition_ID').AsInteger;
   tblRoundRound_Type.AsInteger := tblCompetition.FieldByName('Type_ID').AsInteger;
   tblRoundRound_Num.AsInteger := tblRound.RecordCount + 1;
 end;
@@ -576,13 +606,7 @@ end;
 procedure TDataMain.tblRoundUpdateRecord(DataSet: TDataSet;
   UpdateKind: TUpdateKind; var UpdateAction: TUpdateAction);
 begin
-  tblRoundAfterOpen(DataSet);
-end;
-
-procedure TDataMain.tblRoundAfterOpen(DataSet: TDataSet);
-begin
-  tblEvent.Open;
-  qryPool.Open;
+  ReOpenDataset(qryPool);
 end;
 
 procedure TDataMain.tblCompetitionCalcFields(DataSet: TDataSet);
@@ -601,6 +625,8 @@ begin
   tblRound.Open;
   qryGetQuery.Open;
   tblTask.Open;
+  tblEvent.Open;
+  qryPool.Open;
 end;
 
 procedure TDataMain.tblMemberBeforeOpen(DataSet: TDataSet);
@@ -654,10 +680,10 @@ begin
 end;
 
 procedure TDataMain.qryPoolAfterOpen(DataSet: TDataSet);
-var i, j : integer;
+var i, Cnt : integer;
     StreamBlob: TStream;
 begin
-  j := 0;
+  Cnt := 0;
   with MemPool do begin
     Close;
     EmptyTable;
@@ -668,22 +694,24 @@ begin
       while not qryPool.Eof do  begin
         for i := 1 to 3 do
           if (not qryPool.FieldByName('Image'+IntToStr(i)).IsNull) then begin
-              inc(j);
-              try
-                StreamBlob := qryPool.CreateBlobStream(qryPool.FieldByName('Image'+IntToStr(i)),bmRead);
-                with MemPool.CreateBlobStream(MemPool.FieldByName('Pic'+IntToStr(j)),bmWrite) do
-                  try
-                    CopyFrom(StreamBlob,StreamBlob.Size);
-                  finally
-                    Free;
-                  end;
-              finally
-                StreamBlob.Free;
-              end;
-          end;
+            inc(Cnt);
+            try
+              StreamBlob := qryPool.CreateBlobStream(qryPool.FieldByName('Image'+IntToStr(i)),bmRead);
+              with MemPool.CreateBlobStream(MemPool.FieldByName('Pic'+IntToStr(Cnt)),bmWrite) do
+                try
+                  CopyFrom(StreamBlob,StreamBlob.Size);
+                finally
+                  Free;
+                end;
+            finally
+              StreamBlob.Free;
+            end;
+          end
+          else
+            break;
           qryPool.Next;
       end;
-      FieldByName('CountPic').AsInteger := j;
+      FieldByName('CountPic').AsInteger := Cnt;
       Post;
     end;
   end;
@@ -704,11 +732,13 @@ begin
   qryReport.Close;
 
 // закрыть все что было открыто вместе с таблицей
+  tblEvent.Close;
   tblJudge.Close;
   tblTeam.Close;
   tblType.Close;
   tblRound.Close;
-  tblTask.Close;  
+  tblTask.Close;
+  qryPool.Close;
   qryGetQuery.Close;
 end;
 
@@ -737,7 +767,6 @@ end;
 procedure TDataMain.tblRoundAfterClose(DataSet: TDataSet);
 begin
   MemPool.DeleteTable;
-  tblEvent.Close;
 end;
 
 procedure TDataMain.tblRoundPool_Sequence_CodeChange(Sender: TField);
@@ -931,6 +960,11 @@ begin
       Delete;
     Close;
   end;
+end;
+
+procedure TDataMain.tblRoundAfterPost(DataSet: TDataSet);
+begin
+  ReOpenDataset(qryPool);
 end;
 
 end.

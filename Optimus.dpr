@@ -49,4 +49,6 @@ begin
   Application.CreateForm(TDataMain, DataMain);
   Application.CreateForm(TDataJudge, DataJudge);
   Application.Run;
+  SplashScreen.Hide;
+  SplashScreen.Free;  
 end.

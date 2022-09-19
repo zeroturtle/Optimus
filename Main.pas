@@ -205,23 +205,23 @@ end;
 procedure TfMain.FormShow(Sender: TObject);
 var i : byte;
 begin
-  try
-    N3.Enabled := License^.Active;
-    fSelection := TfSelection.Create(Self);
-    if fSelection.ShowModal = mrOk then begin
-      // выбранное соревнование принадлежит списку
-      N18.Enabled := ((Convert([WSP,WSA,CP]) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
-      N19.Enabled := ((Convert([FS2,FS4,VFS,SF,SF6,FFF,FFC,FFS]) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
-    end
-    else begin
-      // если не выбрано соревнование
-      N18.Enabled := false;
-      N19.Enabled := false;
+  CloseAllClick(Sender);
+  with TfSelection.Create(Self) do
+    try
+      if ShowModal = mrOk then begin
+        // выбранное соревнование принадлежит списку
+        N18.Enabled := ((Convert(WSCPEvents) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
+        N19.Enabled := ((Convert(FSEvents) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
+      end
+      else begin
+        // если не выбрано соревнование
+        N18.Enabled := false;
+        N19.Enabled := false;
+      end;
+    finally
+      Free;
     end;
-  finally
-    fSelection.Free;
-  end;
-  
+
   Caption := Format('%s - "%s"',[APPLICATIONCAPTION, DataMain.tblCompetitionName.AsString]);
   SetLength( PortState, MAXPORTS );
   
@@ -231,10 +231,8 @@ begin
   { Set the path to where the files will be stored/retreived }
   TFTPPath := IncludeTrailingPathDelimiter(VIDEODIRECTORY);
   // -TFTP
-  
+
   if OpenForm(Competition_GUID) then TfCompetition.Create(Self);
-  SplashScreen.Hide;
-  SplashScreen.Free;
 end;
 
 {
@@ -263,40 +261,17 @@ var i, j: integer;
   Rt:TRect;
   jp:TJpegImage;
 
-{
-  LIC_YEAR1 = 2015; LIC_MONTH1 = 7; LIC_DAY1 = 1;
-  LIC_YEAR2 = 2015; LIC_MONTH2 = 12; LIC_DAY2 = 31;
-  LIC_NUMBER = '2BY';
-  LIC_QTY = 1;
-  LIC_TYPE = FS2;  // только FS
-  LIC_OWNER = 'инструктор ФПС РБ Елена Субоч elena_ufa@mail.ru  +7-917-42-999-72';
-}
-{
-  LIC_YEAR1 = 2016; LIC_MONTH1 = 4; LIC_DAY1 = 1;
-  LIC_YEAR2 = 2016; LIC_MONTH2 = 12; LIC_DAY2 = 31;
-  LIC_NUMBER = '3RU';
-  LIC_QTY = 3;
-  LIC_TYPE : TEventSet = [FS2,SF6,SF];
-  LIC_OWNER = 'ДЗ Ватулино Трифонова Евгения contacts@vatulino.ru';
-}
-{
-  LIC_YEAR1 = 2018; LIC_MONTH1 = 4; LIC_DAY1 = 1;
-  LIC_YEAR2 = 2019; LIC_MONTH2 = 4; LIC_DAY2 = 1;
-  LIC_NUMBER = '4RU';
-  LIC_QTY = 3;
-  LIC_TYPE : TEventSet = [FS2,FS4,VFS,SF,SF6];
-  LIC_OWNER = 'Клуб Десантник Шапарин Юрий Юрьевич mobile1360996@gmail.com';
-}
 
 const
-// параметры для новой лицензии
+// параметры для новой лицензии 
   LIC_YEAR1 = 2022; LIC_MONTH1 = 1; LIC_DAY1 = 1;
   LIC_YEAR2 = 2022; LIC_MONTH2 = 12; LIC_DAY2 = 31;
   LIC_NUMBER = '1UA';
   LIC_QTY = 5;
-  LIC_TYPE = [FS2,FS4,FS8,VFS,SF,SF6,FFF,FFC,FFS,WSP,WSA,CP,CF];
+  LIC_TYPE = AllEvents;   //FSEvents + AEvents + WSCPEvents
   LIC_OWNER = '"DZ Mayskoe"  www.mayskoe.com';
-  
+
+
 begin
 // считываем параметры командной строки
   DATABASEFILE := ChangeFileExt(ParamStr(0), '.abs');  // имя файла БД по умолчанию
@@ -343,6 +318,7 @@ begin
 
 // ниже - это процедура SaveLicense(LicenseFile);
   try
+    Flags := CRYPT_STRING_BASE64REQUESTHEADER;
     CryptBinaryToString(pointer(License), SizeOf(License^), Flags, nil, sz);
     SetLength(RS, sz);
     CryptBinaryToString(pointer(License), SizeOf(License^), Flags, pointer(RS), sz);
@@ -354,9 +330,8 @@ begin
 // конец генератора лицензии
 //*****************************
 }
-  // читаем лицензию из файла
-  // ReadLicense(LicenseFile, License);
   try
+    // читаем лицензию из файла
     S := TFileStream.Create(LicenseFile,fmOpenRead);
     sz := S.Size;
     SetLength(RS, sz);
@@ -366,27 +341,14 @@ begin
     License^.Active := (CompareDateTime(Now, License^.DateStart) >= 0) and
                        (CompareDateTime(License^.DateEnd, Now) >= 0);
     // простроченная дата лицензии
-    if not License^.Active then begin
+    if not License^.Active then
       if ShowLicenseDlg(License) then begin
-        //EventType оставляем из старой лицензии
-      end
-      else begin
-        License^.Active := false;
         HistoryListBox.Lines.Add(LICENSEEXPIREDMSG);
       end;
-    end;
   except
-    // если проблема с чтением лицензии
-    with License^ do begin
-      DateStart := Date;
-      DateEnd:= Date;
-      Owner := 'Optimus';
-      Number := 'free';
-      QtyLicense := 1;
-      EventType := [FS4];
-      Active := false;
+    if ShowLicenseDlg(License) then begin
+      HistoryListBox.Lines.Add(LICENSEMSG);
     end;
-    HistoryListBox.Lines.Add(LICENSEMSG);
   end;
   MAXPORTS := License^.QtyLicense;
 
@@ -542,12 +504,7 @@ end;
 
 procedure TfMain.N8Click(Sender: TObject);
 begin
-  if CompareDateTime(Now, License^.DateStart) +
-     CompareDateTime(License^.DateEnd, Now) < 2 then begin     //проверяем дату лицензии
-       License^.Active := false;
-  end
-  else
-    if OpenForm(Scoring_GUID) then fJudgeCtrl := TfJudgeCtrl.Create(Self);
+  if OpenForm(Scoring_GUID) then fJudgeCtrl := TfJudgeCtrl.Create(Self);
 end;
 
 procedure TfMain.N12Click(Sender: TObject);
@@ -612,27 +569,6 @@ begin
     FreeAndNil(Stream);
   end;
 end;
-
-(*
-var
-  I: integer;
-  F: TextFile;
-  FirstLine: string;
-begin
-  OpenDialog1.Options := [ofAllowMultiSelect, ofFileMustExist];
-  OpenDialog1.FilterIndex := 2; { start the dialog showing all files }
-  if OpenDialog1.Execute then
-    with OpenDialog1.Files do
-      for I := 0 to Count - 1 do
-      begin
-        AssignFile(F, Strings[I]);  { next file in Files property }
-
-        Reset(F);
-        Readln(F, FirstLine);  { Read the first line out of the file }
-        Memo1.Lines.Append(FirstLine);  { Add the line to the memo }
-        CloseFile(F);
-      end;
-*)
 
 procedure TfMain.N13Click(Sender: TObject);
 begin

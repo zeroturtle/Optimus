@@ -10,19 +10,19 @@ type
   TAboutBox = class(TForm)
     OKButton: TButton;
     Bevel1: TBevel;
-    SKUName: TLabel;
-    PhysMem: TLabel;
-    OS: TLabel;
-    Label3: TLabel;
+    ApplicationVersion: TLabel;
     Logo: TImage;
     ApplicationName: TRxLabel;
     Inform: TMemo;
-    Button1: TButton;
+    lbContact: TLabel;
+    lbSiteLink: TLabel;
     procedure FormCreate(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure lbSiteLinkClick(Sender: TObject);
+    procedure lbSiteLinkMouseEnter(Sender: TObject);
+    procedure lbSiteLinkMouseLeave(Sender: TObject);
   private
-    procedure GetOSInfo;
-    procedure InitializeCaptions;
+//    procedure GetOSInfo;
+//    procedure InitializeCaptions;
   end;
 
 procedure ShowAboutBox;
@@ -30,7 +30,7 @@ function AppVersion(const Filename: string):string;
 
 implementation
 
-uses ShellAPI, constant, fLicense;
+uses ShellAPI, constant;
 
 {$R *.DFM}
 
@@ -44,7 +44,7 @@ begin
       Free;
     end;
 end;
-
+{
 procedure TAboutBox.GetOSInfo;
 var
   Platform: string;
@@ -80,6 +80,29 @@ begin
       Win32MinorVersion])
 end;
 
+procedure TAboutBox.InitializeCaptions;
+var
+  MS: TMemoryStatus;
+begin
+  GetOSInfo;
+  MS.dwLength := SizeOf(TMemoryStatus);
+  GlobalMemoryStatus(MS);
+  ApplicationName.Caption := APPLICATIONCAPTION;
+  SKUName.Caption := APPNAME;
+  PhysMem.Caption := FormatFloat('#,###" KB"', MS.dwTotalPhys div 1024);
+  with Inform.Lines do begin
+    Add(Format(APPVERSIONNUMBER,[AppVersion(Application.ExeName)]));
+    Add(APPCOPYRIGHT);
+    Add(APPCONTRIB);
+    Add('');
+    Add('');
+    Add(Format('Лицензия №: %s',[License^.Number]));
+    Add(Format('Срок действия: %s - %s',[DateToStr(License^.DateStart), DateToStr(License^.DateEnd)]));
+    Add(Format('Владелец: %s',[License^.Owner]));
+  end;
+end;
+}
+
 function AppVersion(const Filename: string):string;
 var dwHandle: THandle;
     dwSize: DWORD;
@@ -102,36 +125,45 @@ begin
   end;
 end;
 
-procedure TAboutBox.InitializeCaptions;
-var
-  MS: TMemoryStatus;
+function Dec2Bin(iVal:word): string;
 begin
-  GetOSInfo;
-  MS.dwLength := SizeOf(TMemoryStatus);
-  GlobalMemoryStatus(MS);
-  ApplicationName.Caption := APPLICATIONCAPTION;
-  SKUName.Caption := APPNAME;
-  PhysMem.Caption := FormatFloat('#,###" KB"', MS.dwTotalPhys div 1024);
-  with Inform.Lines do begin
-    Add(Format(APPVERSIONNUMBER,[AppVersion(Application.ExeName)]));
-    Add(APPCOPYRIGHT);
-    Add(APPCONTRIB);
-    Add('');
-    Add('');    
-    Add(Format('Лицензия №: %s',[License^.Number]));
-    Add(Format('Срок действия: %s - %s',[DateToStr(License^.DateStart), DateToStr(License^.DateEnd)]));
-    Add(Format('Владелец: %s',[License^.Owner]));
+  Result := '';
+  while iVal <> 0 do begin
+    Result := IntToStr(iVal and 1)+Result;
+    iVal := iVal shr 1;
   end;
 end;
 
 procedure TAboutBox.FormCreate(Sender: TObject);
 begin
-  InitializeCaptions;
+  ApplicationName.Caption := APPLICATIONCAPTION;
+  ApplicationVersion.Caption := APPNAME+CR+Format(APPVERSIONNUMBER,[AppVersion(Application.ExeName)]);
+  with Inform.Lines do begin
+//    Add(APPCONTRIB);
+    Add(Format('Номер: %s', [License^.Number]));
+    Add(Format('Владелец: %s',[License^.Owner]));
+    Add(Format('Количество: %d', [License^.QtyLicense]));
+    Add(Format('Дисциплины: %s',[Dec2Bin(Convert(License^.EventType))]));
+    Add(Format('Срок действия: %s-%s',[DateToStr(License^.DateStart), DateToStr(License^.DateEnd)]));
+//    Add(Format('Активность: %s', [BoolToStr(License^.Active,true)]));
+  end;
+  lbContact.Caption := APPCOPYRIGHT;
+  lbSiteLink.Caption := APPAUTORSITE;
 end;
 
-procedure TAboutBox.Button1Click(Sender: TObject);
+procedure TAboutBox.lbSiteLinkClick(Sender: TObject);
 begin
-  ShowLicenseDlg(License);
+  ShellExecute(Application.Handle,PChar('open'),PChar('https://'+APPAUTORSITE),nil,nil,SW_SHOW);
+end;
+
+procedure TAboutBox.lbSiteLinkMouseEnter(Sender: TObject);
+begin
+  (Sender as TLabel).Font.Color := clBlue;
+end;
+
+procedure TAboutBox.lbSiteLinkMouseLeave(Sender: TObject);
+begin
+  (Sender as TLabel).Font.Color := clWindowText;
 end;
 
 end.

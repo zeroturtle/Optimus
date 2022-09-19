@@ -57,8 +57,8 @@ object DataMain: TDataMain
       end>
     TableName = 'Pool'
     Exclusive = False
-    Left = 298
-    Top = 8
+    Left = 274
+    Top = 64
     object tblPoolPool_Code: TStringField
       FieldName = 'Pool_Code'
       Size = 5
@@ -97,8 +97,8 @@ object DataMain: TDataMain
     ReadOnly = False
     TableName = 'Roles'
     Exclusive = False
-    Left = 80
-    Top = 8
+    Left = 336
+    Top = 112
   end
   object tblPeople: TABSTable
     CurrentVersion = '7.90 '
@@ -846,9 +846,8 @@ object DataMain: TDataMain
     InMemory = False
     ReadOnly = False
     BeforeOpen = tblRoundBeforeOpen
-    AfterOpen = tblRoundAfterOpen
     AfterClose = tblRoundAfterClose
-    AfterScroll = tblRoundAfterOpen
+    AfterPost = tblRoundAfterPost
     OnCalcFields = tblRoundCalcFields
     OnNewRecord = tblRoundNewRecord
     OnUpdateRecord = tblRoundUpdateRecord
@@ -1164,8 +1163,8 @@ object DataMain: TDataMain
     IndexName = 'idxID'
     TableName = 'Type'
     Exclusive = False
-    Left = 192
-    Top = 8
+    Left = 152
+    Top = 64
   end
   object tblCountry: TABSTable
     CurrentVersion = '7.90 '
@@ -1174,8 +1173,8 @@ object DataMain: TDataMain
     ReadOnly = False
     TableName = 'Country'
     Exclusive = False
-    Left = 136
-    Top = 8
+    Left = 280
+    Top = 112
   end
   object dsRound: TDataSource
     DataSet = tblRound
@@ -1973,7 +1972,7 @@ object DataMain: TDataMain
   object frPool: TfrxDBDataset
     UserName = 'frPool'
     CloseDataSource = False
-    DataSource = dsPool
+    DataSet = MemPool
     BCDToCurrency = False
     Left = 650
     Top = 8
@@ -2048,8 +2047,8 @@ object DataMain: TDataMain
     Exclusive = False
     MasterFields = 'Round_Type'
     MasterSource = dsRound
-    Left = 466
-    Top = 104
+    Left = 218
+    Top = 112
   end
   object qryJumpError: TABSQuery
     CurrentVersion = '7.90 '
@@ -2270,8 +2269,8 @@ object DataMain: TDataMain
     ReadOnly = False
     TableName = 'PoolType'
     Exclusive = False
-    Left = 248
-    Top = 8
+    Left = 216
+    Top = 64
   end
   object frShilders: TfrxDBDataset
     UserName = 'frShilders'
@@ -2293,8 +2292,8 @@ object DataMain: TDataMain
       'FROM Queries q, Competition c '
       'WHERE (c.Type_ID=q.Type_ID OR q.Type_ID IS NULL)'
       'AND c.Competition_ID = :Competition_ID')
-    Left = 448
-    Top = 257
+    Left = 392
+    Top = 305
     ParamData = <
       item
         DataType = ftUnknown
@@ -2326,8 +2325,8 @@ object DataMain: TDataMain
     ReadOnly = False
     TableName = 'Club'
     Exclusive = False
-    Left = 352
-    Top = 8
+    Left = 88
+    Top = 112
   end
   object tblEvent: TABSTable
     CurrentVersion = '7.90 '
@@ -2385,8 +2384,8 @@ object DataMain: TDataMain
     InMemory = False
     ReadOnly = False
     BeforeOpen = qryCompetitionBeforeOpen
-    Left = 504
-    Top = 256
+    Left = 448
+    Top = 304
   end
   object tblStartList: TABSTable
     CurrentVersion = '7.90 '
@@ -2416,7 +2415,7 @@ object DataMain: TDataMain
     DataSet = qryTeamMembers
     BCDToCurrency = False
     Left = 648
-    Top = 466
+    Top = 464
   end
   object tblMemberResult: TABSTable
     CurrentVersion = '7.90 '
@@ -2773,8 +2772,8 @@ object DataMain: TDataMain
     Exclusive = False
     MasterFields = 'Type_ID'
     MasterSource = dsComp
-    Left = 464
-    Top = 8
+    Left = 152
+    Top = 112
   end
   object qryPenalty: TABSQuery
     CurrentVersion = '7.90 '
@@ -2786,7 +2785,7 @@ object DataMain: TDataMain
       
         'SELECT * FROM Penalty pe WHERE pe.Type_ID=:Type_ID OR Type_ID IS' +
         ' NULL')
-    Left = 408
+    Left = 464
     Top = 8
     ParamData = <
       item

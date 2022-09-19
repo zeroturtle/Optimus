@@ -4,18 +4,21 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, constant;
+  Dialogs, StdCtrls, constant, ExtCtrls;
 
 type
   TLicense_Expired = class(TForm)
     Button1: TButton;
-    Button2: TButton;
     OpenDialog1: TOpenDialog;
-    Memo1: TMemo;
-    procedure Button2Click(Sender: TObject);
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure Label2Click(Sender: TObject);
+    procedure Label2MouseEnter(Sender: TObject);
+    procedure Label2MouseLeave(Sender: TObject);
   private
     { Private declarations }
     NewLicense : PLicense;
@@ -43,9 +46,21 @@ begin
     try
       NewLicense^ := ALicense^;
       if ShowModal=mrOK then begin
-        SaveLicense(LicenseFile,NewLicense);
-        ALicense^ := NewLicense^;
-      end;
+        // пока не загружаем 
+//        SaveLicense(LicenseFile,NewLicense);
+      end
+      else
+        // FreeLicense properties
+        with NewLicense^ do begin
+          DateStart := Date;
+          DateEnd:= Date;
+          Owner := LICENSEUNREGMSG;
+          Number := 'Free';
+          QtyLicense := 1;
+          EventType := FSEvents;
+          Active := false;
+        end;
+      ALicense^ := NewLicense^;
     finally
       Free;
     end;
@@ -93,19 +108,10 @@ begin
   end;
 end;
 
-procedure TLicense_Expired.Button2Click(Sender: TObject);
-begin
-  if OpenDialog1.Execute then begin
-    try
-      ReadLicense(OpenDialog1.FileName, NewLicense);
-      ShowLicense;
-    finally
-    end;
-  end;
-end;
-
 procedure TLicense_Expired.ShowLicense;
 begin
+  Label3.Caption := NewLicense^.Owner;
+{
   with Memo1.Lines do begin
     Clear;
     Add(Format('Номер: %s', [NewLicense^.Number]));
@@ -115,6 +121,7 @@ begin
     Add(Format('Срок действия: %s-%s',[DateToStr(NewLicense^.DateStart), DateToStr(NewLicense^.DateEnd)]));
     Add(Format('Активность: %s', [BoolToStr(NewLicense^.Active,true)]));
   end;
+}
 end;
 
 procedure TLicense_Expired.FormShow(Sender: TObject);
@@ -130,6 +137,27 @@ end;
 procedure TLicense_Expired.FormDestroy(Sender: TObject);
 begin
   FreeMem(NewLicense);
+end;
+
+procedure TLicense_Expired.Label2Click(Sender: TObject);
+begin
+  if OpenDialog1.Execute then begin
+    try
+      ReadLicense(OpenDialog1.FileName, NewLicense);
+      ShowLicense;
+    finally
+    end;
+  end;
+end;
+
+procedure TLicense_Expired.Label2MouseEnter(Sender: TObject);
+begin
+  (Sender as TLabel).Color := clLime;
+end;
+
+procedure TLicense_Expired.Label2MouseLeave(Sender: TObject);
+begin
+  (Sender as TLabel).Color := clGreen;
 end;
 
 end.

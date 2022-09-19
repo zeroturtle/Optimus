@@ -61,9 +61,8 @@ begin
   with DataMain.tblCompetition do begin
     Filter := 'Competition_ID='+IntToStr(FieldByName('Competition_ID').AsInteger);
     Filtered := true;
-    if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then  begin
-      License^.Active := false;
-    end;
+    if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then
+        ShowMessage(LICENSETYPEMSG);
     try
       with OptionsList do begin
         CommaText := FieldByName('Options').AsString;

@@ -40,16 +40,20 @@ type
 
 
 const
-    CR = #13;
-
+  CR = #13;
+  FSEvents = [FS2,FS4,FS8,VFS,SF,SF6,CF];
+  AEvents = [FFF,FFC,FFS]; //Free,Comp,Sert
+  WSCPEvents = [WSP,WSA,CP];
+  AllEvents = FSEvents + AEvents + WSCPEvents;
 
 resourcestring
 //  Все надписи в программе
   APPLICATIONCAPTION = 'OPTIMUS';
-  APPNAME      = 'Система электронного судейства';
-  APPCONTRIB   = 'При поддержке ДЗ Майское (Днепропетровск, Украина)';
-  APPVERSIONNUMBER = 'Версия: %s';
-  APPCOPYRIGHT = 'Автор ©: 2009 - 2022  Александр Ткаченко';
+  APPNAME         = 'Система электронного судейства';
+  APPCONTRIB      = 'При поддержке ДЗ Майское (Днепропетровск, Украина)';
+  APPVERSIONNUMBER= 'Версия: %s';
+  APPCOPYRIGHT    = 'Автор ©: 2009 - 2022  Александр Ткаченко';
+  APPAUTORSITE    = 'optimus.skydive.dp.ua';
 
 // сообщения в журнал работы программы
   FALSESTARTMSG   = '%s Несинхронный запуск таймера Монитор №%d (%s) : %.0f мс';
@@ -74,28 +78,30 @@ resourcestring
   MAXVALUEERRORMSG= 'ВНИМАНИЕ!  Обнаружена оценка больше допустимого значения %d';
   MINPOINTSERRORMSG= 'ВНИМАНИЕ!  Количество оценок меньше допустимого %d';
   CONSNUMERRORMSG = 'Недопустимый номер судейской консоли (%d)';
-  ATTANTIONMSG   = 'Функция не поддерживается';
-  LICENSEMSG     = 'Ошибка чтения лицензии';
+  ATTANTIONMSG    = 'Функция не поддерживается';
+  LICENSEMSG      = 'Ошибка чтения лицензии';
   LICENSEEXPIREDMSG= 'Используется простроченная лицензия';
+  LICENSEUNREGMSG = 'Нерегистрированная копия';
+  LICENSETYPEMSG  = 'Тип отсутствует в списке лицензии';
 
-  CONSOLACTIVE   = 'Пульты активны';
-  CONSOLINACTIVE = 'Пульты выключены';
+  CONSOLACTIVE    = 'Пульты активны';
+  CONSOLINACTIVE  = 'Пульты выключены';
 
-  RESULTTIME    = 'Время установки %d позиции: %.2f сек';
-  CONSOLTITLE   = 'Судейская консоль № %d (%s)';
-  REQUESTSTRING = 'Установленные запросы: ';
-  TABLESTRINGS  = 'Фигуры,Оценки,Ошибки';
-  ERRORITEM0     = 'Убрать ошибку';
-  JUDGINGTITLE  = '%s '+CR+'Тур №%s, команда %s'+CR+'%s';
+  RESULTTIME      = 'Время установки %d позиции: %.2f сек';
+  CONSOLTITLE     = 'Судейская консоль № %d (%s)';
+  REQUESTSTRING   = 'Установленные запросы: ';
+  TABLESTRINGS    = 'Фигуры,Оценки,Ошибки'; //названия строк редактора консоли
+  ERRORITEM0      = 'Убрать ошибку';
+  JUDGINGTITLE    = '%s '+CR+'Тур №%s, команда %s'+CR+'%s';
 
 // Меню судейской консоли
-  MAINMENUITEM0 = 'Отменить крайнее изменение';
-  MAINMENUITEM1 = 'Показать жеребьевку';
-  MAINMENUITEM2 = 'Не видно отделения (штраф -20)';
-  MAINMENUITEM3 = 'Запрос фрагмента';
-  MAINMENUITEM4 = 'Указание ошибки "Пропуск фигуры или перехода"';
-  MAINMENUITEM5 = 'Сохранить результат';
-  MAINMENUITEM6 = 'Поменять оценки с предыдущим просмотром с текущим';
+  MAINMENUITEM0   = 'Отменить крайнее изменение';
+  MAINMENUITEM1   = 'Показать жеребьевку';
+  MAINMENUITEM2   = 'Не видно отделения (штраф -20)';
+  MAINMENUITEM3   = 'Запрос фрагмента';
+  MAINMENUITEM4   = 'Указание ошибки "Пропуск фигуры или перехода"';
+  MAINMENUITEM5   = 'Сохранить результат';
+  MAINMENUITEM6   = 'Поменять оценки с предыдущим просмотром с текущим';
 
   SCORINGMENUITEM0 = 'Просмотр на стандартной скорости';
   SCORINGMENUITEM1 = 'Просмотр на замедленной скорости';
@@ -213,15 +219,6 @@ HELPCONTENT =
   CONFIRMMENULIST: array[0..3] of String  =(CONFIRMMENUITEM0,CONFIRMMENUITEM1,CONFIRMMENUITEM2,CONFIRMMENUITEM3);
   SCORINGMENULIST: array[0..1] of String  =(SCORINGMENUITEM0, SCORINGMENUITEM1);
 
-{  VIEWOPTIONLIST : array[0..2] of record Title, Field : string; Width : integer end
-                  = ((Title : VIEWOPTIONITEM1; Field : 'Points'; Width : 2),
-                     (Title : VIEWOPTIONITEM2; Field : 'Times'; Width : 4),
-                     (Title : VIEWOPTIONITEM3; Field : 'Errors'; Width : 2));
-
-      VIEWOPTIONITEM1 = 'Оценки';
-      VIEWOPTIONITEM2 = 'Время';
-      VIEWOPTIONITEM3 = 'Ошибки';
-}
 // Запросы судей
   JC_NONE       = $00;   //ничего
   JC_REPEAT     = $01;

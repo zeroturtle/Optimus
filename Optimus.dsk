@@ -1,20 +1,19 @@
 [Closed Files]
-File_0=SourceModule,'C:\PROJECTS\Optimus\Main.pas',0,1,358,60,372,0,0
-File_1=SourceModule,'C:\PROJECTS\Optimus\constant.pas',0,1,61,107,72,0,0
-File_2=SourceModule,'C:\PROJECTS\Optimus\ABOUT.PAS',0,1,104,75,112,0,0
-File_3=SourceModule,'C:\PROJECTS\Optimus\fLicense.pas',0,1,97,62,103,0,0
-File_4=SourceModule,'c:\program files\borland\delphi7\source\rtl\common\classes.pas',0,1,5103,56,5104,0,0
-File_5=SourceModule,'C:\PROJECTS\Optimus\XPBase64.pas',0,1,59,108,67,0,0
-File_6=SourceModule,'c:\program files\borland\delphi7\source\rtl\Sys\sysutils.pas',0,1,10899,41,10911,0,0
-File_7=SourceModule,'c:\program files\borland\delphi7\source\rtl\Sys\system.pas',0,1,16020,36,16033,0,0
-File_8=SourceModule,'C:\PROJECTS\Optimus\options.pas',0,1,104,86,117,0,0
-File_9=SourceModule,'c:\program files\borland\delphi7\source\vcl\Forms.pas',0,1,602,96,611,0,0
+File_0=SourceModule,'C:\PROJECTS\Optimus\shf_FormAbstract.pas',0,1,230,90,239,0,0
+File_1=SourceModule,'C:\PROJECTS\Optimus\Comps.pas',0,1,134,50,156,1,0
+File_2=SourceModule,'C:\PROJECTS\Optimus\options.pas',0,1,129,50,137,1,0
+File_3=SourceModule,'C:\PROJECTS\Optimus\Main.pas',0,1,510,86,516,1,0
+File_4=SourceModule,'C:\PROJECTS\Optimus\Select.pas',0,1,49,73,56,1,0
+File_5=SourceModule,'C:\PROJECTS\Optimus\constant.pas',0,1,68,90,77,0,0
+File_6=SourceModule,'c:\program files\borland\delphi7\source\vcl\Menus.pas',0,1,1803,72,1822,0,0
+File_7=SourceModule,'C:\PROJECTS\Optimus\fLicense.pas',0,1,44,53,61,1,0
+File_8=SourceModule,'c:\program files\borland\delphi7\source\rtl\Sys\sysutils.pas',0,1,13461,53,13474,0,0
+File_9=SourceModule,'c:\program files\borland\delphi7\source\rtl\Sys\system.pas',0,1,8673,54,8686,0,0
 
 [Modules]
 Module0=C:\PROJECTS\Optimus\JCtrl.pas
 Module1=C:\PROJECTS\Optimus\Unit5.pas
-Module2=C:\PROJECTS\Optimus\Result.pas
-Count=3
+Count=2
 EditWindowCount=1
 
 [C:\PROJECTS\Optimus\JCtrl.pas]
@@ -26,11 +25,6 @@ FormOnTop=0
 ModuleType=SourceModule
 FormState=1
 FormOnTop=1
-
-[C:\PROJECTS\Optimus\Result.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
 
 [C:\Program Files\Borland\Delphi7\Projects\ProjectGroup1.bpg]
 FormState=0
@@ -44,16 +38,11 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\PROJECTS\Optimus\shf_FormAbstract.pas]
-FormState=0
-FormOnTop=0
-
 [EditWindow0]
-ViewCount=3
-CurrentView=2
+ViewCount=2
+CurrentView=1
 View0=0
 View1=1
-View2=2
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -71,29 +60,22 @@ LeftPanelSize=140
 LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=000004000000000000000000000000000000000000000000000100000000000000000C000000436F64654578706C6F726572FFFFFFFF
 RightPanelSize=0
-BottomPanelSize=85
+BottomPanelSize=0
 BottomPanelClients=MessageView@EditWindow0
-BottomPanelData=00000400000000005B050000000000000255000000000000000100000000000000000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000B0000004D65737361676556696577FFFFFFFF
+BottomPanelData=00000400010000000B0000004D657373616765566965775B050000000000000255000000000000000100000000000000000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000000000001000000005B0500000B0000004D65737361676556696577FFFFFFFF
 
 [View0]
 Module=C:\PROJECTS\Optimus\Unit5.pas
-CursorX=62
-CursorY=812
-TopLine=799
+CursorX=1
+CursorY=776
+TopLine=769
 LeftCol=1
 
 [View1]
-Module=C:\PROJECTS\Optimus\Result.pas
-CursorX=61
-CursorY=45
-TopLine=19
-LeftCol=1
-
-[View2]
 Module=C:\PROJECTS\Optimus\JCtrl.pas
-CursorX=33
-CursorY=1865
-TopLine=1839
+CursorX=55
+CursorY=2055
+TopLine=2048
 LeftCol=1
 
 [Watches]
@@ -216,7 +198,7 @@ Dockable=1
 SplitPos=112
 ArrangeBy=Name
 SelectedItem=Name
-ExpandedItems=DataBinding,DataController,Filter,Font.Style,NotifyFilters,Properties,Properties.AssignedValues,Properties.ValueChecked,Properties.ValueUnchecked,Title,Value,VisibleButtons
+ExpandedItems=DataBinding,DataController,Filter,Font.Style,NotifyFilters,Properties,Properties.AssignedValues,Properties.ValueChecked,Properties.ValueUnchecked,Style,Style.TextStyle,Title,Value,VisibleButtons
 HiddenCategories=
 
 [BreakpointWindow]
@@ -392,18 +374,18 @@ State=0
 Left=0
 Top=12
 Width=140
-Height=635
+Height=723
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=140
-ClientHeight=635
+ClientHeight=723
 TBDockHeight=305
 LRDockWidth=140
 Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=1
+Visible=0
 State=0
 Left=12
 Top=0

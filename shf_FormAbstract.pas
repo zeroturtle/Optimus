@@ -133,7 +133,7 @@ procedure Tfsh_FormAbstract.ActionExecute(Sender: TObject);
 begin
   case TComponent(Sender).Tag of
     1: begin cds_ActiveDataSet.Insert;
-    cds_ActiveDataSetBeforeEdit(cds_ActiveDataSet); end;
+       cds_ActiveDataSetBeforeEdit(cds_ActiveDataSet); end;
     2: begin cds_ActiveDataSet.Edit; cds_ActiveDataSetBeforeEdit(cds_ActiveDataSet); end;
     3: if (MessageBox(0, 'Удалить запись?', 'Удаление', MB_ICONQUESTION or MB_YESNO) = IDYES) then
        cds_ActiveDataSet.Delete;

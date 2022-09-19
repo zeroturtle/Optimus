@@ -297,6 +297,7 @@ object fOptions: TfOptions
     ParentShowHint = False
     ShowHint = True
     TabOrder = 5
+    OnExit = DirectoryEdit1Exit
   end
   object cxSpinEdit3: TcxSpinEdit
     Left = 216
