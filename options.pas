@@ -152,11 +152,12 @@ begin
   CONCENSUSTIME := _CONCENSUSTIME;
 //  _PUSHPROTECTPERIOD не меняется
   VIDEODIRECTORY := _VIDEODIRECTORY;
-  MAXVALUE := _MAXVALUE;
-  MAXPENALTY := _MAXPENALTY;
+  MAXVALUE := DataMain.tblType.FieldByName('MaxValue').AsInteger; //_MAXVALUE;
+  MAXPENALTY := DataMain.tblType.FieldByName('MaxPenalty').AsInteger; //_MAXPENALTY;
   VIEWSCREEN := false;
   USEFTP  := false;
   FIRSTJUDGEMONITORNUM := 2;
+  FormCreate(Sender);
 end;
 
 procedure TfOptions.RadioGroup1Click(Sender: TObject);

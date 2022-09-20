@@ -202,8 +202,8 @@ HELPCONTENT =
   _SPLASHFORMTIME = 3000;     //ждать 3 секунды
   _PUSHPROTECTPERIOD = 200;   // Период в который блокируется двойное нажатие кнопок, мс
   _CONCENSUSTIME  = 150;      // задержка переключения Sequence ,ms
-  _MAXVALUE       = 10;       // наибольшая оценка что можно поставить.
-  _MAXPENALTY     = -3;       // максимальный штраф
+//  _MAXVALUE       = 1;        // наибольшая оценка что можно поставить.
+//  _MAXPENALTY     = 0;        // максимальный штраф
   _PLAYBACKSPEED  = 50;       // Скорость замедленного просмотра
   _BEEPQUANTITY   = 7;        // Количество beep
   _VIEWSCREEN     = false;    // на какой экран показывать видео
@@ -273,8 +273,8 @@ var
   MINPOINTS : integer = 0;     //Число оценок которое ставится при старте 
   MAXPORTS : integer = 1;               //Количество портов
   CONCENSUSTIME : integer = _CONCENSUSTIME;
-  MAXVALUE : integer = _MAXVALUE;
-  MAXPENALTY : integer = _MAXPENALTY;
+  MAXVALUE : integer; 
+  MAXPENALTY : integer;
   PLAYBACKSPEED : integer = _PLAYBACKSPEED;
   VIEWSCREEN : boolean = _VIEWSCREEN;
   VIDEODIRECTORY : string = _VIDEODIRECTORY;    // каталог хранения видео

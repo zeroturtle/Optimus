@@ -1978,12 +1978,13 @@ begin
     SQL.Add(' WHERE Port IS NOT NULL AND r.Competition_ID=j.Competition_ID  AND r.Result_ID=:Result_ID) jr ON (v.Monitor=jr.Monitor);');
     SQL.Add('INSERT INTO ResultDetail SELECT * FROM MEMORY ResultDetail;');
     SQL.Add('DELETE FROM MEMORY ViewDetail; DELETE FROM MEMORY ResultDetail;');
-    SQL.Add('UPDATE RoundResult rr SET JudgeTime=Now, StartTime = :StartTime WHERE rr.Result_ID=:Result_ID');
+    SQL.Add('UPDATE RoundResult rr SET JudgeTime=Now,ViewNumber =:ViewNumber, StartTime = :StartTime WHERE rr.Result_ID=:Result_ID');
     DatabaseName := 'dbJudge';
     DataSource := DataMain.dsComp;
     Params[0].AsInteger := ROUNDID;
-    Params[1].AsInteger := StartTime;
-    Params[2].AsInteger := ROUNDID;
+    Params[1].AsInteger := View;
+    Params[2].AsInteger := StartTime;
+    Params[3].AsInteger := ROUNDID;
     ExecSQL;
     Free;
   end;

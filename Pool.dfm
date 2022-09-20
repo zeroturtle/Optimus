@@ -1,6 +1,6 @@
 object fd_Pool: Tfd_Pool
-  Left = 966
-  Top = 213
+  Left = 804
+  Top = 358
   BorderStyle = bsSingle
   Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082' '#1092#1080#1075#1091#1088
   ClientHeight = 501
@@ -67,6 +67,8 @@ object fd_Pool: Tfd_Pool
         object colPoolName: TcxGridDBColumn
           Caption = 'DivePool'
           DataBinding.FieldName = 'PoolName'
+          Visible = False
+          GroupIndex = 0
           MinWidth = 50
         end
         object colImage1: TcxGridDBColumn

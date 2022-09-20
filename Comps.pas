@@ -125,7 +125,7 @@ begin
     RightList := TStringList.Create;
     try
       with qryPoolLeft do  begin
-        sql.Text := Format('SELECT Pool_Code, Name FROM Pool P LEFT JOIN Competition C ON (C.Pool_ID=P.Type_ID) WHERE Competition_ID =%d',
+        sql.Text := Format('SELECT Pool_Code, Name FROM Pool P LEFT JOIN Competition C ON (C.Pool_ID=P.Pool_ID) WHERE Competition_ID =%d',
                            [DataMain.tblCompetition.FieldByName('Competition_ID').AsInteger]);
         Open;
         while not EOF do begin

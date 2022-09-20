@@ -651,6 +651,9 @@ object fJudgeCtrl: TfJudgeCtrl
   end
   object dlDivePool: TDualListDialog
     Sorted = False
+    Title = #1046#1077#1088#1077#1073#1100#1077#1074#1082#1072' '#1090#1091#1088#1072
+    Label1Caption = #1057#1087#1080#1089#1086#1082' '#1092#1086#1088#1084#1072#1094#1080#1081
+    Label2Caption = #1060#1086#1088#1084#1072#1094#1080#1080' '#1090#1091#1088#1072
     HelpContext = 0
     Left = 185
     Top = 65

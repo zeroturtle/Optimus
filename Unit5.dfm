@@ -16,80 +16,6 @@ object DataMain: TDataMain
     Left = 24
     Top = 8
   end
-  object tblPool: TABSTable
-    CurrentVersion = '7.90 '
-    DatabaseName = 'dbJudge'
-    InMemory = False
-    ReadOnly = False
-    StoreDefs = True
-    IndexDefs = <
-      item
-        Name = 'idxCodeType'
-        Fields = 'Pool_Code;Type_ID'
-        Options = [ixUnique]
-      end>
-    FieldDefs = <
-      item
-        Name = 'Pool_Code'
-        DataType = ftString
-        Size = 5
-      end
-      item
-        Name = 'Name'
-        DataType = ftString
-        Size = 60
-      end
-      item
-        Name = 'Type_ID'
-        DataType = ftInteger
-      end
-      item
-        Name = 'Image'
-        DataType = ftBlob
-      end
-      item
-        Name = 'Pool_Img2'
-        DataType = ftBlob
-      end
-      item
-        Name = 'Pool_Img3'
-        DataType = ftBlob
-      end>
-    TableName = 'Pool'
-    Exclusive = False
-    Left = 274
-    Top = 64
-    object tblPoolPool_Code: TStringField
-      FieldName = 'Pool_Code'
-      Size = 5
-    end
-    object tblPoolName: TStringField
-      FieldName = 'Name'
-      Size = 60
-    end
-    object tblPoolType_ID: TIntegerField
-      FieldName = 'Type_ID'
-    end
-    object tblPoolImage1: TBlobField
-      FieldName = 'Image1'
-    end
-    object tblPoolImage2: TBlobField
-      FieldName = 'Image2'
-    end
-    object tblPoolImage3: TBlobField
-      FieldName = 'Image3'
-    end
-    object tblPoolPoolName: TStringField
-      FieldKind = fkLookup
-      FieldName = 'PoolName'
-      LookupDataSet = tblPoolType
-      LookupKeyFields = 'Pool_ID'
-      LookupResultField = 'Name'
-      KeyFields = 'Type_ID'
-      Size = 50
-      Lookup = True
-    end
-  end
   object tblRoles: TABSTable
     CurrentVersion = '7.90 '
     DatabaseName = 'dbJudge'
@@ -1993,7 +1919,7 @@ object DataMain: TDataMain
       'when Figure5=Pool_Code then 5 end as IMG,'
       'r.Pool_Sequence_Code as Pool_Sequence'
       'FROM pool p, round r, Competition c'
-      'WHERE c.Pool_ID=p.Type_ID  AND c.Competition_ID=r.Competition_ID'
+      'WHERE c.Pool_ID=p.Pool_ID  AND c.Competition_ID=r.Competition_ID'
       'AND IMG>0 AND r.Round_ID=:Round_ID'
       'order by IMG')
     Left = 514
@@ -3195,5 +3121,83 @@ object DataMain: TDataMain
     ReadOnly = False
     Left = 24
     Top = 520
+  end
+  object tblPool: TABSTable
+    CurrentVersion = '7.90 '
+    DatabaseName = 'dbJudge'
+    InMemory = False
+    ReadOnly = False
+    StoreDefs = True
+    IndexDefs = <
+      item
+        Name = 'idxCodeType'
+        Fields = 'Pool_ID;Pool_Code'
+        Options = [ixUnique]
+      end>
+    IndexFieldNames = 'Pool_ID'
+    FieldDefs = <
+      item
+        Name = 'Pool_Code'
+        DataType = ftString
+        Size = 2
+      end
+      item
+        Name = 'Name'
+        DataType = ftString
+        Size = 60
+      end
+      item
+        Name = 'Pool_ID'
+        DataType = ftInteger
+      end
+      item
+        Name = 'Image1'
+        DataType = ftBlob
+      end
+      item
+        Name = 'Image2'
+        DataType = ftBlob
+      end
+      item
+        Name = 'Image3'
+        DataType = ftBlob
+      end>
+    TableName = 'Pool'
+    Exclusive = False
+    MasterFields = 'Pool_ID'
+    MasterSource = dsComp
+    Left = 280
+    Top = 64
+    object tblPoolPool_Code: TStringField
+      FieldName = 'Pool_Code'
+      Size = 2
+    end
+    object tblPoolName: TStringField
+      FieldName = 'Name'
+      Size = 60
+    end
+    object tblPoolPool_ID: TIntegerField
+      FieldName = 'Pool_ID'
+    end
+    object tblPoolPoolName: TStringField
+      DisplayWidth = 50
+      FieldKind = fkLookup
+      FieldName = 'PoolName'
+      LookupDataSet = tblPoolType
+      LookupKeyFields = 'Pool_ID'
+      LookupResultField = 'Name'
+      KeyFields = 'Pool_ID'
+      Size = 50
+      Lookup = True
+    end
+    object tblPoolImage1: TBlobField
+      FieldName = 'Image1'
+    end
+    object tblPoolImage2: TBlobField
+      FieldName = 'Image2'
+    end
+    object tblPoolImage3: TBlobField
+      FieldName = 'Image3'
+    end
   end
 end

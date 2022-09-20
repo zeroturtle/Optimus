@@ -9,7 +9,6 @@ uses
 type
   TDataMain = class(TDataModule)
     dbJudge: TABSDatabase;
-    tblPool: TABSTable;
     tblRoles: TABSTable;
     tblPeople: TABSTable;
     tblJudge: TABSTable;
@@ -196,13 +195,6 @@ type
     tblJudgeAddress: TStringField;
     tblJudgeLocation: TStringField;
     tblTeamCountry_Code: TStringField;
-    tblPoolPool_Code: TStringField;
-    tblPoolName: TStringField;
-    tblPoolType_ID: TIntegerField;
-    tblPoolImage1: TBlobField;
-    tblPoolImage2: TBlobField;
-    tblPoolImage3: TBlobField;
-    tblPoolPoolName: TStringField;
     tblClub: TABSTable;
     tblPeoplePeople_ID: TAutoIncField;
     tblPeopleName: TStringField;
@@ -306,6 +298,14 @@ type
     tblMemberResultTeam_ID: TIntegerField;
     tblMemberResultMemberTeam_ID: TIntegerField;
     qryCalcResult: TABSQuery;
+    tblPool: TABSTable;
+    tblPoolPool_Code: TStringField;
+    tblPoolName: TStringField;
+    tblPoolPool_ID: TIntegerField;
+    tblPoolImage1: TBlobField;
+    tblPoolImage2: TBlobField;
+    tblPoolImage3: TBlobField;
+    tblPoolPoolName: TStringField;
     procedure tblCompetition2BeforeClose(DataSet: TDataSet);
     procedure tblRoundResultBeforeOpen(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
@@ -714,6 +714,7 @@ begin
       FieldByName('CountPic').AsInteger := Cnt;
       Post;
     end;
+    Open;
   end;
 end;
 
@@ -751,8 +752,8 @@ begin
     Add(IntToStr(_CONCENSUSTIME));
     Add(IntToStr(_PUSHPROTECTPERIOD));
     Add(_VIDEODIRECTORY);
-    Add(IntToStr(_MAXVALUE));
-    Add(IntToStr(_MAXPENALTY));
+    Add(IntToStr(tblType.FieldByName('MaxValue').AsInteger)); //_MAXVALUE
+    Add(IntToStr(tblType.FieldByName('MaxPenalty').AsInteger)); //_MAXPENALTY
     Add(BoolToStr(_VIEWSCREEN,true));
     Add(BoolToStr(_USEFTP,true));
     DataMain.tblCompetition.FieldByName('Options').AsString := CommaText;
