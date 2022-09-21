@@ -251,27 +251,13 @@ end;
 }
 
 procedure TfMain.FormCreate(Sender: TObject);
-var i, j: integer;
+var i: integer;
    S : TFileStream;
    sz, skip: dword;
    RS : String;
    Flags: dword;
 
-  Year, Month, Day, Hour, Min, Sec, MSec: Word;
-  Rt:TRect;
   jp:TJpegImage;
-
-
-const
-// параметры для новой лицензии 
-  LIC_YEAR1 = 2022; LIC_MONTH1 = 1; LIC_DAY1 = 1;
-  LIC_YEAR2 = 2022; LIC_MONTH2 = 12; LIC_DAY2 = 31;
-  LIC_NUMBER = '1UA';
-  LIC_QTY = 5;
-  LIC_TYPE = AllEvents;   //FSEvents + AEvents + WSCPEvents
-  LIC_OWNER = '"DZ Mayskoe"  www.mayskoe.com';
-
-
 begin
 // считываем параметры командной строки
   DATABASEFILE := ChangeFileExt(ParamStr(0), '.abs');  // имя файла БД по умолчанию
@@ -302,34 +288,6 @@ begin
 // Создаем лицензию
 //*****************************
   GetMem(License, SizeOf(TLicense));
-{
-//*****************************
- // создаем и сохраняем лицензию в файл --InitLicense
-//  DecodeDate(Now, Year, Month, Day);
-  with License^ do begin
-//    DateStart := EncodeDateTime(Year,Month,Day,0,0,0,0);
-    DateStart := EncodeDateTime(LIC_YEAR1,LIC_MONTH1,LIC_DAY1,0,0,0,0);
-    DateEnd := EncodeDateTime(LIC_YEAR2,LIC_MONTH2,LIC_DAY2,0,0,0,0); // YEAR,MONTH,DAY,HOUR,MINUTE,SECOND,MS
-    Number := LIC_NUMBER;
-    QtyLicense := LIC_QTY;
-    EventType := LIC_TYPE;
-    Owner := LIC_OWNER;
-  end;
-
-// ниже - это процедура SaveLicense(LicenseFile);
-  try
-    Flags := CRYPT_STRING_BASE64REQUESTHEADER;
-    CryptBinaryToString(pointer(License), SizeOf(License^), Flags, nil, sz);
-    SetLength(RS, sz);
-    CryptBinaryToString(pointer(License), SizeOf(License^), Flags, pointer(RS), sz);
-    S := TFileStream.Create(LicenseFile, fmCreate);
-    S.Write(pointer(RS)^,sz);
-  finally
-    S.Free;
-  end;
-// конец генератора лицензии
-//*****************************
-}
   try
     // читаем лицензию из файла
     S := TFileStream.Create(LicenseFile,fmOpenRead);
@@ -370,9 +328,9 @@ begin
     end;
 
   HistoryListBox.Lines.Add(Format(MONITORCOUNTMSG, [DateTimeToStr(Now),Screen.MonitorCount]));
-  for j := 0 to High(MonList) do   // прочитать разрешение всех подключенных экранов
-    with MonList[j] do
-      HistoryListBox.Lines.Add(Format(MONITORRESMSG, [DateTimeToStr(Now),j,h,dc,r.Left,r.Top,r.Right,r.Bottom]));
+  for i := 0 to High(MonList) do   // прочитать разрешение всех подключенных экранов
+    with MonList[i] do
+      HistoryListBox.Lines.Add(Format(MONITORRESMSG, [DateTimeToStr(Now),i,h,dc,r.Left,r.Top,r.Right,r.Bottom]));
 
   R := TCnRawKeyBoard.Create(Self);
   R.OnRawKeyDown := RawKeyDown;

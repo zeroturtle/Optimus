@@ -36,6 +36,10 @@ object DataJudge: TDataJudge
       item
         Name = 'Error_ID'
         DataType = ftInteger
+      end
+      item
+        Name = 'Judge_ID'
+        DataType = ftInteger
       end>
     TableName = 'ViewDetail'
     Exclusive = False
@@ -587,7 +591,7 @@ object DataJudge: TDataJudge
       
         'where c.Competition_ID=r.Competition_ID AND r.Round_ID=rr.Round_' +
         'ID AND rr.Result_ID=:Result_ID'
-      'AND c.Pool_ID=p.Type_ID AND IMG>0'
+      'AND c.Pool_ID=p.Pool_ID AND IMG>0'
       'order by IMG')
     Left = 288
     Top = 16

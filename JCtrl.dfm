@@ -315,7 +315,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object DBText1: TDBText
         Left = 0
         Top = 495
-        Width = 1341
+        Width = 303
         Height = 90
         Align = alTop
         Alignment = taCenter
@@ -332,7 +332,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label3: TLabel
         Left = 0
         Top = 0
-        Width = 1341
+        Width = 46
         Height = 13
         Align = alTop
         Caption = #1054#1062#1045#1053#1050#1048
@@ -340,7 +340,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label5: TLabel
         Left = 0
         Top = 330
-        Width = 1341
+        Width = 51
         Height = 13
         Align = alTop
         Caption = #1064#1058#1056#1040#1060#1067
@@ -348,7 +348,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label6: TLabel
         Left = 0
         Top = 165
-        Width = 1341
+        Width = 38
         Height = 13
         Align = alTop
         Caption = #1042#1056#1045#1052#1071
@@ -467,7 +467,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Top = 34
           Width = 137
           Height = 21
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 5
           Text = #1053#1072#1095#1072#1083#1086' '#1056#1072#1073'.'#1042#1088#1077#1084#1077#1085#1080
           OnChange = ComboBox1Change
@@ -477,7 +477,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Top = 34
           Width = 137
           Height = 21
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 6
           Text = #1050#1086#1085#1077#1094' '#1056#1072#1073'.'#1042#1088#1077#1084#1077#1085#1080
           OnChange = ComboBox2Change

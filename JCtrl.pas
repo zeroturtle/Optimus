@@ -1829,7 +1829,6 @@ begin
       MAXPOINTS := Length(POINTMASK);
       MINPOINTS := FieldByName('MQP').Value;
       ColumnsName.CommaText := FieldByName('Columns').AsString;
-      Close;
       // проверка разрешенного типа соревнования
       if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then begin
         ShowMessage(LICENSETYPEMSG);
@@ -1839,6 +1838,7 @@ begin
         fCopyright.ShowModal;
         fCopyright.Free;}
       end;
+      Close;      
     finally
       Free;
     end;
@@ -1973,8 +1973,8 @@ procedure TfJudgeCtrl.btnSaveClick(Sender: TObject);
 begin
    {сохранить результат из Memory в базу}
   with TABSQuery.Create(Self) do begin
-    SQL.Add('INSERT INTO ViewDetail SELECT v.*, jr.Judge_ID FROM MEMORY ViewDetail v ');
-    SQL.Add('LEFT JOIN (SELECT Result_ID, Judge_ID, Port-1 Monitor, IsTrainee FROM RoundResult r, Judges j ');
+    SQL.Add('INSERT INTO ViewDetail SELECT v.Result_ID, v.Monitor, v.Sequence, v.Point, v.ATime, v.Error_ID, jr.Judge_ID');
+    SQL.Add('FROM MEMORY ViewDetail v LEFT JOIN (SELECT Result_ID, Judge_ID, Port-1 Monitor, IsTrainee FROM RoundResult r, Judges j ');
     SQL.Add(' WHERE Port IS NOT NULL AND r.Competition_ID=j.Competition_ID  AND r.Result_ID=:Result_ID) jr ON (v.Monitor=jr.Monitor);');
     SQL.Add('INSERT INTO ResultDetail SELECT * FROM MEMORY ResultDetail;');
     SQL.Add('DELETE FROM MEMORY ViewDetail; DELETE FROM MEMORY ResultDetail;');

@@ -12,7 +12,7 @@ type
     OpenDialog1: TOpenDialog;
     Label1: TLabel;
     Label2: TLabel;
-    Label3: TLabel;
+    Image1: TImage;
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -110,7 +110,7 @@ end;
 
 procedure TLicense_Expired.ShowLicense;
 begin
-  Label3.Caption := NewLicense^.Owner;
+//  Label3.Caption := NewLicense^.Owner;
 {
   with Memo1.Lines do begin
     Clear;
