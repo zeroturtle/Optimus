@@ -3,8 +3,8 @@ object DataMain: TDataMain
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
   Left = 256
-  Top = 361
-  Height = 655
+  Top = 360
+  Height = 656
   Width = 730
   object dbJudge: TABSDatabase
     CurrentVersion = '7.90 '
@@ -1917,7 +1917,8 @@ object DataMain: TDataMain
       'when Figure3=Pool_Code then 3'
       'when Figure4=Pool_Code then 4'
       'when Figure5=Pool_Code then 5 end as IMG,'
-      'r.Pool_Sequence_Code as Pool_Sequence'
+      'r.Pool_Sequence_Code as Pool_Sequence,'
+      '[Value]'
       'FROM pool p, round r, Competition c'
       'WHERE c.Pool_ID=p.Pool_ID  AND c.Competition_ID=r.Competition_ID'
       'AND IMG>0 AND r.Round_ID=:Round_ID'
@@ -2074,15 +2075,17 @@ object DataMain: TDataMain
     SQL.Strings = (
       'SELECT SQV as Sequence, Description, max(CNT)  FROM'
       
-        '  (SELECT Result_ID, Sequence+1 SQV,  Error_ID, count(vd.Error_I' +
+        '  (SELECT Result_ID, Sequence+1 SQV,  Error_ID, count(ve.Error_I' +
         'D) CNT'
-      '  FROM ViewDetail vd  WHERE Result_ID= :Result_ID'
-      '  GROUP BY Result_ID, Sequence, Error_ID) a'
+      
+        '  FROM ViewDetail vd  LEFT JOIN ViewError ve ON (vd.Sequence=ve.' +
+        'Sequence) WHERE ve.Result_ID=vd.Result_ID AND vd.:Result_ID'
+      '  GROUP BY Result_ID, Sequence, Error_ID, SQV) a'
       '  LEFT JOIN Errors e ON e.Error_ID=a.Error_ID'
       'GROUP BY  SQV, Description'
       
         'HAVING max(CNT)  >= (SELECT cast(count(Monitor) float)/2 FROM Re' +
-        'sultDetail WHERE Result_ID= :Result_ID) '
+        'sultDetail WHERE :Result_ID) '
       'ORDER BY 1')
     Left = 568
     Top = 152
@@ -2164,6 +2167,42 @@ object DataMain: TDataMain
         Name = 'Pool_Sequence'
         DataType = ftString
         Size = 20
+      end
+      item
+        Name = 'Value1'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value2'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value3'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value4'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value5'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value6'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value7'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value8'
+        DataType = ftFloat
+      end
+      item
+        Name = 'Value9'
+        DataType = ftFloat
       end>
     TableName = 'Pool'
     Exclusive = False
@@ -3198,6 +3237,9 @@ object DataMain: TDataMain
     end
     object tblPoolImage3: TBlobField
       FieldName = 'Image3'
+    end
+    object tblPoolValue: TFloatField
+      FieldName = 'Value'
     end
   end
 end

@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  constant, Dialogs, ExtCtrls, StdCtrls, ComCtrls, DBCtrls, Grids, DBGrids, DB;
+  constant, Dialogs, ExtCtrls, StdCtrls, ComCtrls, DBCtrls, Grids, DBGrids, DB,
+  ABSMain;
 
 type
   TfJudgeConsol = class(TForm)
@@ -32,6 +33,7 @@ type
     StatusBar1: TStatusBar;
     DBText1: TDBText;
     pnlMessage: TPanel;
+    qryErrors: TABSQuery;
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -46,10 +48,12 @@ type
     A: array of String;
   public
     { Public declarations }
+    ErrV : TPoint; //для ввода ErrorValue
     PortNum : Integer;
-    PANELSVISIBLE : byte;
+    PANELSVISIBLE : Word;
+    subID : Variant;  //Error_ID подменю
   end;
-                          
+
   TPort = record
     KeyBoard: THandle;  // номер USB-устройства
     Name: string;       // имя порта, используется при отображении результата
@@ -58,24 +62,15 @@ type
     IsTrain: boolean;   // стажеры не в счет ?!
     JudgeCall: byte;    // устаревшее, не используется
     PredMode: TMode;
-    Form : TForm;   //TfJudgeConsol;
+    Form : TForm;       //TfJudgeConsol;
     Scores, PScores :   TArrPoint;  //оценки судейства
-{
-    case ActionForm: TActionForm of
-      Score:(
-                IsTrain: boolean;   // стажеры не в счет ?!
-                Form : TfJudgeConsol;
-                Scores, PScores :   TArrPoint;  //оценки судейства
-            );
-      Test: (
-              CanTest : BOOL;
-              Form : TTestForm;
-              Answer: array of TKeys; //ответы пульта
-            );
-}            
+    Undo : array of TUndoPoint;// изменения внесенные редактором
+    V : ^TPoint;        // сюда записывается ввод из AddDigit
+      {может указывать на Scores[Sequence]
+       или на ErrV в режиме mValue }
   end;
 
-  
+
 var
   fJudgeConsol: TfJudgeConsol;
   PortState : array of TPort; // текущее состояние каждого судейской консоли
@@ -86,6 +81,7 @@ uses Unit5, DMJ;
 
 {$R *.dfm}
 
+
 procedure TfJudgeConsol.FormCreate(Sender: TObject);
 var i:integer;
   ColumnsName : TStringList;
@@ -93,7 +89,7 @@ begin
   PANELSVISIBLE := Modes[mIdle].PANELS;
   with grdScore do begin
     ColCount := MAXPOINTS+1;
-    RowCount := 3;
+    RowCount := 3;  //название_колонки, оценка, ошибка
   end;
   SetLength(A, 3);// инициализация массива сколько сохранять просмотров
 
@@ -105,7 +101,8 @@ begin
     grdJumpResult.Columns[i+2].Width := Canvas.TextWidth(ColumnsName[i])+12;
   end;
   FreeAndNil(ColumnsName);
-
+  
+  subID := NULL;
 end;
 
 procedure TfJudgeConsol.FormClose(Sender: TObject;
@@ -168,20 +165,27 @@ procedure TfJudgeConsol.grdScoreDrawCell(Sender: TObject; ACol,
 var EditLine: integer;
     H, L, i : Integer;
     WidthVisibleColumns : integer;
+
+  function GetSum(A:array of TErrorRec):Single;
+  var i : integer;
+  begin
+    Result := 0;
+    for i := Low(A) to High(A) do
+       Result := Result + A[i].Value;
+  end;
 begin
 //  AutoSizeCol(TStringGrid(Sender), ACol);
-  with PortState[PortNum] do
-  StatusBar1.Panels[0].Text := Format(RESULTTIME, [Sequence+1,
-       (Scores[Sequence].Time-StartTime)/1000000]);
-//  StatusBar1.Panels[2].Text := Modes[PortState[PortNum].Mode].Name;
+  with PortState[PortNum] do begin
+    StatusBar1.Panels[0].Text := Format(RESULTTIME,[(Scores[Sequence].Time-StartTime)/1000000,GetSum(Scores[Sequence].Err)]);
+    if Mode = mError then EditLine := 2 else EditLine := 1;
+  end;
 
-  if PortState[PortNum].Mode = mError then EditLine := 2 else EditLine := 1;
   with Sender as TStringGrid do
-    if not ( gdfixed In State ) and (PortState[PortNum].Mode in [mEdit, mError]) then begin
+    if not ( gdfixed In State ) and (PortState[PortNum].Mode in [mEdit, mError, mMenu]) then begin
 
        if ((ACol = PortState[PortNum].Sequence+1) and (ARow = EditLine)) then
          Canvas.Brush.Color := clRed
-       else if ((PortState[PortNum].Scores[ACol-1].Point = 0) and (Trim(PortState[PortNum].Scores[ACol-1].Err) = '')
+       else if ((PortState[PortNum].Scores[ACol-1].Point = 0) and (PortState[PortNum].Scores[ACol-1].Err = nil)
            and (PortState[PortNum].Scores[ACol-1].Time <> 0)) and (ARow = 2) then
              Canvas.Brush.Color := clYellow // непоставленную причину ошибки выделяем желтым
        else Canvas.Brush.Color := clSilver;
@@ -220,22 +224,24 @@ procedure TfJudgeConsol.FormPaint(Sender: TObject);
 var i, n : integer;
     W, H, R : integer;
     Ratio : real;
-    IMG : TPicture;
 begin
 // Фоновая картинка
   Canvas.StretchDraw(rect(8, 8, ClientWidth - 8, ClientHeight - 8), BackgoundPic);
 
 // отобразить панели согласно текущего режима.
-  if VIEWSCREEN then  PANELSVISIBLE := Modes[PortState[PortNum].Mode].PANELS;
-  lbInfo.Visible    := (PANELSVISIBLE and JC_INFO) <> 0;
-  pnlResult.Visible := (PANELSVISIBLE and JC_RESULT) <> 0;
-  pnlEdit.Visible   := (PANELSVISIBLE and JC_EDITOR) <> 0;
-  pnlDraw.Visible   := ((PANELSVISIBLE and JC_DRAW) <> 0); //and (not VIEWSCREEN);
+  lbInfo.Visible    := (PANELSVISIBLE and PNL_INFO) <> 0;
+  pnlResult.Visible := (PANELSVISIBLE and PNL_RESULT) <> 0;
+  pnlEdit.Visible   := (PANELSVISIBLE and PNL_EDITOR) <> 0;
+  pnlDraw.Visible   := (PANELSVISIBLE and PNL_DRAW) <> 0;
+  pnlMenu.Visible   := (PANELSVISIBLE and PNL_MENU) <> 0;
+  pnlMessage.Visible:= (PANELSVISIBLE and PNL_MESSAGE) <> 0;
 
 //********************************************
 // menu panel
-  pnlMenu.Left := Width - pnlMenu.Width - 10;
-  pnlMenu.Top := lbInfo.Height;
+  if pnlMenu.Visible then begin
+    pnlMenu.Left := Width - pnlMenu.Width - 10;
+    pnlMenu.Top := lbInfo.Height;
+  end;
 
 //********************************************
 // edit panel
@@ -245,13 +251,32 @@ begin
     grdScore.Invalidate;
   end;
 
-
 //********************************************
 // Result panel
   if pnlResult.Visible then begin
     pnlResult.Width := Width;
     pnlResult.Top := lbInfo.Height + 10;
     grdJumpResult.Height := 30 * (MAXPORTS + 2 ); // количество строк результатов
+  end;
+
+//********************************************
+// message panel
+  with pnlMessage do begin
+    case PortState[PortNum].Mode of
+      mFalse:
+        if (abs(StartTime-PortState[PortNum].Scores[0].Time)/1000 > CONCENSUSTIME) then begin
+           PANELSVISIBLE := PANELSVISIBLE or PNL_MESSAGE;
+           Caption := Format(FALSESTARTMSG,['',PortNum+1,PortState[PortNum].Name, (PortState[PortNum].Scores[0].Time-StartTime)/1000]);
+        end;
+      mConfirm:
+        if (CurrentMode <> mConfirm) then begin
+           PANELSVISIBLE := PANELSVISIBLE or PNL_MESSAGE;
+           Caption := CONFIRMMSG;
+        end;
+      mValue: begin end;
+      else Visible := false;
+    end;
+    Visible := (PANELSVISIBLE and PNL_MESSAGE) <> 0;
   end;
 
 //********************************************
@@ -263,73 +288,42 @@ begin
     else
       pnlDraw.Top := lbInfo.Height + 10;
 //    pnlDraw.Height := Height - pnlDraw.Top - Label4.Height*2;
-  end;
 
-//********************************************
-// message panel
-  with pnlMessage do begin
-    case PortState[PortNum].Mode of
-      mFalse:
-        if (abs(StartTime-PortState[PortNum].Scores[0].Time)/1000 > CONCENSUSTIME)then begin
-           PANELSVISIBLE := PANELSVISIBLE or JC_MESSAGE;
-           Caption := Format(FALSESTARTMSG,['',PortNum+1,PortState[PortNum].Name, (PortState[PortNum].Scores[0].Time-StartTime)/1000]);
-        end;
-      mConfirm:
-        if (CurrentMode <> mConfirm) then begin
-           PANELSVISIBLE := PANELSVISIBLE or JC_MESSAGE;
-           Caption := CONFIRMMSG;
-        end;
-      else Visible := false;
+    // подогнать размер картинок под размер экрана
+    n := DataMain.MemPool.FieldByName('CountPic').AsInteger;
+    ratio := 1;
+  {
+    IMG := TPicture.Create;
+    IMG.Assign(TDBImage(FindComponent('DBImage1')).Picture);
+    if n > 0 then ratio := IMG.Width / IMG.Height
+    else ratio := 1;
+    IMG.Free;
+  }
+    if n > 0 then W := pnlDraw.Width div n;
+    if W - 23 > pnlDraw.Height then
+      pnlDraw.Height := Height - pnlDraw.Top
+    else pnlDraw.Height := W + 23;
+
+    if Round(W / ratio) > pnlDraw.Height then begin
+      H := pnlDraw.Height;
+      W := Round(H * ratio);
+      R := (pnlDraw.Width - W * n) div (n + 1);
+    end
+    else begin
+      H := Round(W / ratio);
+      R := 0;
     end;
-    Visible := (PANELSVISIBLE and JC_MESSAGE) <> 0;
+
+    for i := 1 to 9 do
+      with TDBImage(FindComponent('DBImage'+ IntToStr(i))) do
+        if i > n then Visible := false
+        else begin
+          Height := H;
+          Width := W;
+          Left := W * (i - 1) + R * i;
+          Visible := true;
+        end;
   end;
-
-//**********************
-  // подогнать размер картинок под размер экрана
-  n := DataMain.MemPool.FieldByName('CountPic').AsInteger;
-
-  IMG := TPicture.Create;
-  IMG.Assign(TDBImage(FindComponent('DBImage1')).Picture);
-  if n > 0 then ratio := IMG.Width / IMG.Height
-  else ratio := 1;
-  IMG.Free;
-
-  if n > 0 then W := pnlDraw.Width div n;
-  if W - 23 > pnlDraw.Height then
-    pnlDraw.Height := Height - pnlDraw.Top
-  else pnlDraw.Height := W + 23;
-
-  if Round(W / ratio) > pnlDraw.Height then begin
-    H := pnlDraw.Height;
-    W := Round(H * ratio);
-    R := (pnlDraw.Width - W * n) div (n + 1);
-  end
-  else begin
-    H := Round(W / ratio);
-    R := 0;
-  end;
-
-  for i := 1 to 9 do
-    with TDBImage(FindComponent('DBImage'+ IntToStr(i))) do
-      if i > n then Visible := false
-      else begin
-        Height := H;
-        Width := W;
-        Left := W * (i - 1) + R * i;
-        Visible := true;
-      end;
-//***********************
-
-  // подчеркнем нужную картинку
-{  if pnlDraw.Visible then begin
-    c := TControlCanvas.Create;
-    c.Control := pnlDraw;
-    c.Pen.Color := clYellow;
-    c.Pen.Width := 5;
-    c.MoveTo(DBImage1.Width * (PortState[PortNum].Sequence mod 9), DBImage1.Top + DBImage1.Height + 10);
-    c.LineTo(DBImage1.Width * ((PortState[PortNum].Sequence + 1) mod 9), DBImage1.Top + DBImage1.Height + 10);
-    c.Free;
-  end;}
 end;
 
 end.

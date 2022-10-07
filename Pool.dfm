@@ -52,7 +52,6 @@ object fd_Pool: Tfd_Pool
         DataController.Summary.DefaultGroupSummaryItems = <>
         DataController.Summary.FooterSummaryItems = <>
         DataController.Summary.SummaryGroups = <>
-        OptionsView.Navigator = True
         object colCode: TcxGridDBColumn
           Caption = #1050#1086#1076
           DataBinding.FieldName = 'Pool_Code'

@@ -139,6 +139,7 @@ object fMain: TfMain
       end
       object N13: TMenuItem
         Caption = #1055#1088#1080#1095#1080#1085#1099' '#1096#1090#1088#1072#1092#1086#1074
+        Visible = False
         OnClick = N13Click
       end
     end
@@ -166,7 +167,7 @@ object fMain: TfMain
       end
       object N12: TMenuItem
         Caption = #1055#1072#1088#1072#1084#1077#1090#1088#1099
-        ShortCut = 113
+        ShortCut = 120
         OnClick = N12Click
       end
     end

@@ -21,6 +21,7 @@ type
     tblSequence: TABSTable;
     dsSequence: TDataSource;
     qrySequence: TABSQuery;
+    tblViewError: TABSTable;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
     procedure qrySequenceAfterOpen(DataSet: TDataSet);
@@ -45,6 +46,7 @@ uses Unit5;
 procedure TDataJudge.DataModuleCreate(Sender: TObject);
 begin
   tblViewDetail.CreateTable;
+  tblViewError.CreateTable;
   tblResultDetail.CreateTable;
   tblSequence.CreateTable;
 end;
@@ -52,6 +54,7 @@ end;
 procedure TDataJudge.DataModuleDestroy(Sender: TObject);
 begin
   tblViewDetail.DeleteTable;
+  tblViewError.DeleteTable;
   tblResultDetail.DeleteTable;
   tblSequence.DeleteTable;
 end;
@@ -100,6 +103,7 @@ end;
 procedure TDataJudge.qryListBeforeClose(DataSet: TDataSet);
 begin
     tblViewDetail.Close;
+    tblViewError.Close;
     tblResultDetail.Close;
 end;
 
@@ -107,9 +111,11 @@ procedure TDataJudge.qryListBeforeOpen(DataSet: TDataSet);
 begin
 // удалить предыдущие результаты
     tblViewDetail.EmptyTable;
+    tblViewError.EmptyTable;
     tblResultDetail.EmptyTable;
 
     tblViewDetail.Open;
+    tblViewError.Open;
     tblResultDetail.Open;
 end;
 

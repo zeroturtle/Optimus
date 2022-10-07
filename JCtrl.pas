@@ -24,21 +24,9 @@ type
     constructor Create(F: TForm; Msg : String);
   end;
 
-  TUndoPoint = record
-    Position : integer; // позиция корректировки
-    Point : TPoint;
-    Chain: BOOL; // главное или техническое (последовательное) изменение
-  end;
-
   TfJudgeCtrl = class(TForm)
     cbSpeed: TCheckBox;
-    GroupBox3: TGroupBox;
     Timer1: TTimer;
-    lbPoint1: TLabel;
-    lbPoint2: TLabel;
-    lbPoint3: TLabel;
-    lbPoint4: TLabel;
-    lbPoint5: TLabel;
     FFLogger1: TFFLogger;
     FFPlayer: TFFPlayer;
     grdList: TDBGrid;
@@ -93,6 +81,9 @@ type
     N1: TMenuItem;
     N2: TMenuItem;
     Label1: TLabel;
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -126,6 +117,8 @@ type
     procedure ComboBox2Change(Sender: TObject);
     procedure N1Click(Sender: TObject);
     procedure N2Click(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure Label4Click(Sender: TObject);
   private
     { Private declarations }
     FDuration: Int64;
@@ -134,7 +127,6 @@ type
     FLock: TCriticalSection;
     FRect: TRect;
     DesktopCanvas: TCanvas;
-    procedure HighLight(Scan: TPoint; ScreenOptions: TScreenOption = soPortNum);
     procedure ModeAction(AMode: TMode);
     procedure LabelMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -148,13 +140,6 @@ type
     FContrast: Integer;
     FSaturation: Integer;
     FHue: Integer;
-  end;
-
-  PErrorRec = ^TErrorRec;
-  TErrorRec = record
-     ID : integer;
-     Code: string[6];
-     NV: boolean;
   end;
 
   TIntObj = class
@@ -178,6 +163,9 @@ uses wthread, Unit5, Main, MyUtils, ShellAPI, Settings, DMJ, Variants;
 
 {$R *.dfm}
 
+const
+  pnlDrawCaption = ' Жеребьевка тура';
+
 var Part :BOOL; //показывает просматр фрагмента или полный
 
 {$IF Defined(VER140) OR Defined(VER150)} // Delphi 6, 7
@@ -194,14 +182,12 @@ end;
 {$IFEND}
 
 var
-  Undo : array of array of TUndoPoint;// изменения внесенные редактором
   Log : TStrings;               // журнал работы программы
 
   MAXTIME : byte;               // Максимальное рабочее времяю, s
   POINTMASK : string;           // Маска для результатов подсчета результата
   ROUNDID : Integer;            // ID раунда команды
   TeamName, RoundName, VideoFileName: string;
-  ErrorList : TStrings;
   View: byte; // номер просмотра
   ViewID : Cardinal;
   StartPort : byte;       // номер консоли для старта рабочего времени
@@ -211,7 +197,6 @@ var
   DelayTime : integer;
 
   COLUMNSNAME : TStringList;
-  err : PErrorRec;
   NVErrorNumber: string[6];  // номер ошибки NV
   BeepCount : byte;
 
@@ -251,22 +236,42 @@ begin
   end;
 end;
 
-procedure SaveUndo( Scan: TPoint; P : integer; C : BOOL = true);
-var rs : integer;
-begin
-  rs := Length(Undo[Scan.Port]) + 1;
-  SetLength(Undo[Scan.Port], rs);
-  with Undo[Scan.Port][rs-1] do begin
-    Point := PortState[Scan.Port].Scores[P];
-    Position := P;
-    Chain := C;
-  end;
-end;
-
 function NewPoint(PortNum:Integer; T:Cardinal=0): TPoint;
 begin
   with Result do begin
-    Port := PortNum; Key := 0; Point := 0; Time := T; Err := StringOfChar(' ', 6);
+    Port := PortNum; Key := 0; Point := 0; Time := T;
+    SetLength(Err,0);
+  end;
+end;
+
+// если записывается цепочки, то первым должен записаться C=true
+procedure SaveUndo( Scan: TPoint; P : integer; C : BOOL = true);
+var i : integer;
+begin
+  with PortState[Scan.Port] do begin
+    i := Length(Undo) + 1;
+    SetLength(Undo, i);
+    with Undo[i-1] do begin
+      Point := PortState[Scan.Port].Scores[P];
+      Sequence := P;
+      Chain := C;
+    end;
+    TfJudgeConsol(Form).StatusBar1.Panels[1].Text := Format('Undo=%d',[i]);
+  end;
+end;
+
+procedure RestoreUnDo(Scan: TPoint);
+var i : integer;
+begin
+  with PortState[Scan.Port] do begin
+    i := Length(Undo);
+    while i > 0 do begin
+      Scores[Undo[i-1].Sequence] := Undo[i-1].Point;
+      dec(i);
+      if Undo[i].Chain then break;
+    end;
+    SetLength(Undo, i);
+    TfJudgeConsol(Form).StatusBar1.Panels[1].Text := Format('Undo=%d',[i]);    
   end;
 end;
 
@@ -276,17 +281,35 @@ begin
    with PortState[Port] do begin
      PredMode := Mode;
      Mode := AMode;
+     if Form <> nil then
+       with TfJudgeConsol(Form) do begin
+         if AMode in [mMenu, mError, mValue] then begin
+           PANELSVISIBLE := PANELSVISIBLE or PNL_MENU;
+           if AMode in [mValue] then
+             PANELSVISIBLE := PANELSVISIBLE or PNL_MESSAGE
+           else
+             PANELSVISIBLE := PANELSVISIBLE and ($FF xor PNL_MESSAGE);
+         end
+         else
+           PANELSVISIBLE := PANELSVISIBLE and ($FF xor PNL_MENU) and ($FF xor PNL_MESSAGE);
+         Refresh;
+       end;
    end;
-  with fMain do begin
-    HistoryListBox.Lines.Add(Format(CHANGEMODEMSG, [DateTimeToStr(Now), Modes[AMode].Name, Port]));
-    StatusBar1.Panels[Port+3].Text := Format('%d. %s',[Port+1, Modes[AMode].Name]);
-  end;
+  fMain.HistoryListBox.Lines.Add(Format(CHANGEMODEMSG, [DateTimeToStr(Now), Modes[AMode].Name, Port]));
+  fMain.StatusBar1.Panels[Port+3].Text := Format('%d. %s',[Port+1, Modes[AMode].Name]);
 end;
 
 procedure InitMode(AMode: TMode);
 var i: Integer;
 begin
-  for i := 0 to MAXPORTS-1 do ChangeMode(i, AMode);
+  for i := 0 to MAXPORTS-1 do begin
+    with PortState[i] do
+      if Form <> nil then with TfJudgeConsol(Form) do begin
+        PANELSVISIBLE := Modes[AMode].PANELS;
+        Refresh;
+      end;
+    ChangeMode(i, AMode);
+  end;
   CurrentMode := AMode;
   fJudgeCtrl.ModeAction(AMode);
 end;
@@ -304,13 +327,19 @@ end;
 
 procedure Left( Scan: TPoint );
 begin
-  if PortState[Scan.Port].Sequence > 0 then
-    dec( PortState[Scan.Port].Sequence );
+  with PortState[Scan.Port] do
+    if Sequence > 0 then begin
+      dec( Sequence );
+      V := @Scores[Sequence];
+    end;
 end;
 procedure Right( Scan: TPoint);
 begin
-  if PortState[Scan.Port].Sequence < MAXPOINTS-1 then
-    inc( PortState[Scan.Port].Sequence );
+  with PortState[Scan.Port] do
+    if Sequence < High(Scores) {MAXPOINTS} then begin
+      inc( Sequence );
+      V := @Scores[Sequence];
+    end;
 end;
 
 // удаление оценки
@@ -319,11 +348,12 @@ var
   i : Integer;
 begin
   with PortState[Scan.Port] do begin
-    for i := Sequence to MAXPOINTS do begin
-      SaveUndo( Scores[i], i, (i = Sequence));   // Save UNDO Scores
-      Scores[i] := Scores[i+1];        // Move Scores point
+    for i := Sequence to High(Scores)-1 do begin
+      SaveUndo( Scores[i], i, (i=Sequence));   // Save UNDO Scores
+      Scores[i] := Scores[i+1];                // Move Scores point
     end;
-    Scores[MAXPOINTS] := NewPoint(Scan.Port);
+    Scores[High(Scores){MAXPOINTS}] := NewPoint(Scan.Port);
+    SaveUndo(Scores[High(Scores){MAXPOINTS}], MAXPOINTS, false);
   end;
 end;
 
@@ -332,15 +362,12 @@ procedure Insert(Scan: TPoint);
 var i: Integer;
 begin
   with PortState[Scan.Port] do begin
-    // Save UNDO Scores
-    for i := Sequence to MAXPOINTS do
-       SaveUndo( Scores[i], i, (i = Sequence));
-    // Move Scores point
-    for i := MAXPOINTS downto Sequence do
-      if i <= Length(POINTMASK) then
-        Scores[i] := Scores[i-1]
-      else break;
+    for i := Sequence to High(Scores) do
+       SaveUndo( Scores[i], i, (i=Sequence));   // Save UNDO Scores
+    for i := High(Scores) downto Sequence+1 do
+       Scores[i] := Scores[i-1];                // Move Scores point
     Scores[Sequence] := NewPoint(Scan.Port, StartTime+MAXTIME*1000000);
+    SaveUndo( Scores[Sequence], Sequence, false);
   end;
 end;
 
@@ -363,23 +390,6 @@ begin
     InJudging := false;
   end;
   InitMode(mStandby);
-end;
-
-//подсветка нажатой кнопки на экране
-procedure TfJudgeCtrl.HighLight;
-var
-  L: TLabel;
-begin
-   if (PortState[Scan.Port].Mode in [mReady, mStandby, mScoring, mEdit]) then begin
-     L := TLabel(FindComponent('lbPoint'+IntToStr(Scan.Port+1)));
-     case ScreenOptions of
-        soPortNum   : L.Caption := IntToStr(Scan.Port+1);
-        soAsterisk  : L.Caption := '*';
-        soScorePoint: L.Caption := Format('%.1f',[PortState[Scan.Port].Scores[PortState[Scan.Port].Sequence].Point/10]);
-        soModeName  : L.Caption := Modes[PortState[Scan.Port].Mode].Name;
-     end;
-     TWaitThr.Create(L, Modes[PortState[Scan.Port].Mode].Color);
-   end;
 end;
 
 // определяем момент запуска рабочего времени
@@ -422,21 +432,6 @@ begin
   Result := q = 0;
 end;
 
-function GetPointString(Position: integer; var S: TArrPoint) : ShortString;
-var R : Single;
-begin
-  if (Position <= MAXPOINTS) and (S[Position].Time > 0) then begin
-      case POINTMASK[Position+1] of
-      'P': R := S[Position].Point/10;
-      'T': R := (S[Position].Time-StartTime)/1000000;
-      else
-         R := 0;
-      end;
-      Result := FloatToStr(RoundTo(R,-2));
-  end
-  else Result := ' ';
-end;
-
 {--------------------------------------
       Обработка переключения режимов
 ---------------------------------------}
@@ -452,6 +447,38 @@ end;
 procedure ModeEdit(CurrentPort: Integer);
 var i: integer;
     S: ShortString;
+
+  function GetPointString(Position: integer; var S: TArrPoint) : ShortString;
+  var R : Single;
+  begin
+    if (Position <= MAXPOINTS) and (S[Position].Time > 0) then begin
+        case POINTMASK[Position+1] of
+        'P': R := S[Position].Point/10;
+        'T': R := (S[Position].Time-StartTime)/1000000;
+        else
+           R := 0;
+        end;
+        Result := FloatToStr(RoundTo(R,-2));
+    end
+    else Result := ' ';
+  end;
+  function GetCodes(A:array of TErrorRec):string;
+  var i : integer;
+  begin
+    Result := '';
+    for i := Low(A) to High(A) do
+       if i = 0 then Result := A[i].Code
+       else Result := Result + ','+A[i].Code;
+  end;
+  function GetDesc(A:array of TErrorRec):string;
+  var i : integer;
+  begin
+    Result := '';
+    for i := Low(A) to High(A) do
+      if i = 0 then Result := Format('%.2s.%.30s (%.1f)',[A[i].Code,A[i].Desc,A[i].Value])
+      else Result := Result + Format('; %.2s.%.30s (%.1f)',[A[i].Code,A[i].Desc,A[i].Value]);
+  end;
+  
 begin
  with PortState[CurrentPort] do begin
     with TfJudgeConsol(Form).grdScore do begin  // заполняем результаты каждого пульта в отдельное окно
@@ -462,9 +489,11 @@ begin
         if (Scores[i].Time <> 0) or (PScores[i].Time <> 0) then
           if i <= ColumnsName.Count then
             Cols[i+1].CommaText := Format('"%s","%s|%s","%s|%s"',  //'"%s","%.2f|%.2f","%s|%s"',
-              [COLUMNSNAME[i],GetPointString(i,Scores),GetPointString(i,PScores),Scores[i].Err,PScores[i].Err]);
+              [COLUMNSNAME[i],GetPointString(i,Scores),GetPointString(i,PScores),GetCodes(Scores[i].Err),GetCodes(PScores[i].Err)])
     end;
-    // Изменяем запросы судей
+    TfJudgeConsol(Form).StatusBar1.Panels[2].Text := GetDesc(Scores[Sequence].Err);
+{
+    // Показываем запросы судей
     with TfJudgeConsol(Form) do begin
       S := '';
       for i := Low(JudgeCalls) to High(JudgeCalls) do
@@ -473,6 +502,7 @@ begin
       if S = '' then S := JudgeCalls[0].Name;
       StatusBar1.Panels[1].Text := REQUESTSTRING + S;
     end;
+}
   end;
 end;
 
@@ -481,45 +511,72 @@ procedure ModeMenu(CurrentPort: Integer);
 var i : integer;
 begin
   with TfJudgeConsol(PortState[CurrentPort].Form) do begin
-    if PortState[CurrentPort].Mode = mMenu then begin
-      with pnlMenu do Visible := not Visible;
-      if pnlMenu.Visible then begin
-        lvMenu.Clear;
-        // заполняем список
-        case CurrentMode of
-        mEdit:
-          for i := Low(TASKMENULIST) to High(TASKMENULIST) do
-            lvMenu.AddItem(Format('%d. %s',[i,TASKMENULIST[i]]),nil);
-        mFalse,mReady, mStandby:
-          for i := Low(SCORINGMENULIST) to High(SCORINGMENULIST) do
-           lvMenu.AddItem(Format('%d. %s',[i,SCORINGMENULIST[i]]),nil);
-        mConfirm:
-          for i := Low(CONFIRMMENULIST) to High(CONFIRMMENULIST) do
-           lvMenu.AddItem(Format('%d. %s',[i,CONFIRMMENULIST[i]]),nil);
-        end;
-        lvMenu.ViewStyle := vsList;
-      end;
+    lvMenu.ViewStyle := vsReport;
+    lvMenu.Clear;
+    case CurrentMode of
+    mEdit:
+      for i := Low(TASKMENULIST) to High(TASKMENULIST) do
+        lvMenu.AddItem(Format('%d. %s',[i,TASKMENULIST[i]]),nil);
+    mFalse,mReady, mStandby:
+      for i := Low(SCORINGMENULIST) to High(SCORINGMENULIST) do
+       lvMenu.AddItem(Format('%d. %s',[i,SCORINGMENULIST[i]]),nil);
+    mConfirm:
+      for i := Low(CONFIRMMENULIST) to High(CONFIRMMENULIST) do
+       lvMenu.AddItem(Format('%d. %s',[i,CONFIRMMENULIST[i]]),nil);
     end;
+    lvMenu.ViewStyle := vsList;
   end;
 end;
 
 procedure ModeError(CurrentPort: Integer);
-var i : integer;
+var
+  i : integer;
+  err : PErrorRec;
 begin
   with TfJudgeConsol(PortState[CurrentPort].Form) do begin
-    if PortState[CurrentPort].Mode = mError then begin
-      with pnlMenu do Visible := not Visible;
-      if pnlMenu.Visible then begin
-        lvMenu.Clear;
-        // заполняем список
-        for i := 0 to ErrorList.Count-1 do
-          lvMenu.AddItem(Format('%d. %s',[i,ErrorList[i]]),nil);
-        lvMenu.ViewStyle := vsList;
-        //ListView_SetColumnWidth(lvMenu.Handle, -1, LVSCW_AUTOSIZE); //Выравнивание колонок ListView по содержимому
+    //очистить панель от старого меню
+    for i := 0 to lvMenu.Items.Count-1 do
+      Dispose(PErrorRec(lvMenu.Items[i].Data));
+    lvMenu.Clear;
+    lvMenu.ViewStyle := vsReport;
+
+    // получить список меню ошибок
+    with qryErrors do begin
+      Params[0].Value := TYPEID;
+      Params[1].Value := subID;
+      Open;
+      First; i := 0;
+      lvMenu.AddItem(Format('%d. %s',[i, ERRORITEM0]),nil);
+      while not EOF do begin
+        New(err);
+        err.ID := Fields[0].AsInteger;   //ID
+        err.Code := Fields[2].AsString;  //Code
+        err.Desc := Fields[3].AsString;  //Desc
+        if Fields[4].IsNull then err.Value := 999// Value
+        else err.Value := Fields[4].AsFloat;
+        err.sub := Fields[5].AsInteger;
+        err.Ch := Fields[6].AsBoolean;
+        inc(i);
+        lvMenu.AddItem(Format('%d. %s',[i,Fields[3].AsString]), TObject(err));
+        Next;
       end;
+      Close;
     end;
-    grdScore.Refresh;
+    lvMenu.ViewStyle := vsList;
   end
+end;
+
+procedure ModeValue(CurrentPort: Integer);
+begin
+  // вывести на экран текущее значение V
+    with PortState[CurrentPort] do
+      with TfJudgeConsol(Form) do begin
+        pnlMessage.Caption :=
+          Format('Укажите "%s" в диапазоне 0,1...%.1f :  %.1f',
+                [ErrV.Err[High(ErrV.Err)].Desc,
+                 RoundTo(ErrV.Err[High(ErrV.Err)].Value/10,-1),
+                 RoundTo(ErrV.Point/10,-1)]);
+      end;
 end;
 
 procedure ModeConfirm(CurrentPort: Integer);
@@ -527,10 +584,6 @@ var i: integer;
   L : BOOL;
 begin
   L := true;
-  with TfJudgeConsol(PortState[CurrentPort].Form) do begin
-    PANELSVISIBLE := Modes[PortState[CurrentPort].Mode].PANELS;
-    Refresh;
-  end;
   for i := 0 to High(PortState) do
     if PortState[i].Mode <> mConfirm then begin L := false; break; end;
   //выполнить только когда все пульты подтвердят оценки
@@ -540,71 +593,83 @@ begin
 end;
 
 {---------------------------------------}
-
+// проверяем корректность выставленных оценок
 function CheckError(Scan: TPoint):BOOL ;
 var i : integer;
+  function GetSum(A:array of TErrorRec):Single;
+    var i : integer;
+  begin
+    Result := 0;
+    for i := Low(A) to High(A) do
+       Result := Result + A[i].Value;
+  end;
 begin
   Result := true;
-  for i := 0 to MAXPOINTS do
-    if (PortState[Scan.Port].Scores[i].Time > 0) then begin
-       if (PortState[Scan.Port].Scores[i].Point = 0) and
-          (Trim(PortState[Scan.Port].Scores[i].Err) = '') then begin
+  with PortState[Scan.Port] do begin
+    // проверить чтобы количество поставленных оценок было не меньше MINPOINTS
+    if MINPOINTS > 0 then
+      if Scores[MINPOINTS-1].Time <= 0 then begin //не поставлена
+        TInfoThr.Create(Form,Format(MINPOINTSERRORMSG,[MINPOINTS]));
+        Result := false; Exit;
+      end;
+    for i := 0 to High(Scores) do begin
+      // пока Scores = MAXPOINTS надо обрезать лишние
+      if Scores[i].Time <= 0 then break;
+      
+      //для незасчитанной оценки указана Err
+      if (Scores[i].Point = 0) and (Scores[i].Err = nil) then begin
+        TInfoThr.Create(Form,Format(PENALTYERRORMSG,[i+1]));
+        Result := false; break;
+      end;
+      // проверим чтобы оценка не превышали MAXVALUE
+      if Scores[i].Point > MAXVALUE*10 then begin
+        TInfoThr.Create(Form,Format(MAXVALUEERRORMSG,[i+1,MAXVALUE]));
+        Result := false; break;
+      end;
+      // проверим чтоб штрафы не превышали саму оценку
+      if (Scores[i].Err <> nil) then
+        if GetSum(Scores[i].Err) > Scores[i].Point/10 then begin
+          TInfoThr.Create(Form,Format(MAXPENALTYERRORMSG,[i+1,Scores[i].Point/10]));
           Result := false; break;
-       end;
-    end
-    else break;
-end;
-
-// определяем ErrorID
-function getErrorID(Code:string): Variant;
-var i : integer;
-begin
-  Result := NULL;
-  for i := 0 to ErrorList.Count-1 do
-    if (ErrorList.Objects[i] <> nil) and (PErrorRec(ErrorList.Objects[i]).Code = Code) then begin
-      Result := PErrorRec(ErrorList.Objects[i]).ID;
-      break;
+          break;
+        end;
     end;
+  end; //with
 end;
 
+// сохранить оценки в БД
 function SaveScores(Scan: TPoint) : shortint;
 var
-  i : Integer;
-  Point, Time : real;
+  i, j : Integer;
+  APoint, ATime : Single;
 begin
-// 0. просмотр фрагмента - удаляем прошлый просмотр
-  if Part then
-    ReOpenDataset(DataJudge.qryList);
-    
-// 1.проверить чтобы общее количество оценок было не меньше MINPOINTS
-  if (PortState[Scan.Port].Scores[MINPOINTS-1].Time <= 0) then begin //не поставлена
-      TInfoThr.Create(PortState[Scan.Port].Form,Format(MINPOINTSERRORMSG,[MINPOINTS]));
-      Result := -2; exit; end;
-
-// 2.проверим чтобы оценка не превышали MAXVALUE
-  for i := 0 to MAXPOINTS do
-    if PortState[Scan.Port].Scores[i].Point > MAXVALUE*10 then begin
-      TInfoThr.Create(PortState[Scan.Port].Form,Format(MAXVALUEERRORMSG,[MAXVALUE]));
-      Result := -1; exit; end;
-
-//3. сохранить оценки в БД
   Result := 0; //  Result возвращает количество сохраненных оценок
-  for i := 0 to MAXPOINTS do begin
-    if (PortState[Scan.Port].Scores[i].Time > 0) then begin
-        // запоминаем балы
-        Point := RoundTo(PortState[Scan.Port].Scores[i].Point/10, -2);
-        // запоминаем время оценки
-        if (PortState[Scan.Port].Scores[i].Time-StartTime) / 1000000 <= MAXTIME then
-             Time := (PortState[Scan.Port].Scores[i].Time-StartTime) / 1000000
-        else Time := MAXTIME;  //если поставили в льготное время
 
-        // добавляем оценку в базу
-        //!! Как узнать Judge_ID монитора
-        DataJudge.tblViewDetail.AppendRecord([ROUNDID,Scan.Port,i,Point,Time,getErrorID(Trim(PortState[Scan.Port].Scores[i].Err))]);
-        inc(Result);
-    end
-    else break;
-  end;
+// если просмотр фрагмента - удаляем прошлый просмотр
+  if Part then ReOpenDataset(DataJudge.qryList);
+
+  with PortState[Scan.Port] do
+    for i := 0 to High(Scores) {MAXPOINTS} do begin
+      if (Scores[i].Time > 0) then begin
+          // запоминаем балы
+          APoint := RoundTo(Scores[i].Point/10, -2);
+          // запоминаем время оценки
+          if (Scores[i].Time-StartTime) / 1000000 <= MAXTIME then
+               ATime := (Scores[i].Time-StartTime) / 1000000
+          else ATime := MAXTIME;  //если поставили в льготное время
+
+          // добавляем оценку в базу
+          DataJudge.tblViewDetail.AppendRecord(
+             [ROUNDID,Scan.Port,i,APoint,ATime{,Как узнать Judge_ID монитора?!}]);
+
+          //сохраняем ошибку/штраф
+          with Scores[i] do
+            for j := Low(Err) to High(Err) do
+              DataJudge.tblViewError.AppendRecord([ROUNDID,Scan.Port,i,Err[j].ID ,Err[j].Value]);
+          inc(Result);
+      end
+      else break;
+    end;
   Log.Add(Format(SAVESCORESMSG,[DateTimeToStr(Now),Scan.Port,PortState[Scan.Port].Name]));
 end;
 
@@ -665,98 +730,141 @@ begin
     end;
 end;
 
-// обработка меню ошибок
+// обработка пункта меню ошибок
+{---------------------------------------------------
+  В таблице Errors:
+  1. Если Value=NULL - этот пункт содержит подменю
+  2. Штраф всегда <= MaxValue
+      - для вычисляемых значений, Value это % от MaxValue оценки
+      - для постоянных Value - это максимальное значение штрафа
+  3. Штрафы разделяются на:
+    - постоянный (CanChange=False)
+      - если (Value<0) штраф = Value;
+      - если (Value>0) указывает % от MaxValue, штраф = Value*MaxValue.
+
+    - для (CanChange=True) значения штрафа указывается из диапазона
+      - если (Value<0) штраф = указанное значение из 0,1...Value;
+      - если (Value>0) штраф = указывается значения 0,1...Value*MaxValue.
+   4. Штраф всегда < 0
+---------------------------------------------------}
 procedure ErrorMenuAction(Code: TPoint);
+var
+  ListItem : TListItem;
+  err : PErrorRec;
 begin
   with PortState[Code.Port] do
-  if (Scores[Sequence].Point <= 0)
-      and (ErrorList.Count > Code.Key-VK_NUMPAD0) then
-   case Code.Key of
-      VK_NUMPAD1..VK_NUMPAD9:
-      	Scores[Sequence].Err :=
-           PErrorRec(ErrorList.Objects[Code.Key-VK_NUMPAD0]).Code;
-      else TInfoThr.Create(PortState[Code.Port].Form,ATTANTIONMSG);
+    with TfJudgeConsol(Form) do begin
+      case Code.Key of
+        VK_NUMPAD0: begin
+            SaveUndo(Code, Sequence); //UNDO старое значение
+            SetLength(Scores[Sequence].Err,0); subID := NULL;
+          end;
+        VK_NUMPAD1..VK_NUMPAD9:
+            if (Code.Key-VK_NUMPAD0 <= lvMenu.Items.Count-1) then begin
+              ListItem := lvMenu.Items[Code.Key-VK_NUMPAD0];
+              if ListItem.Data <> nil then begin
+                if PErrorRec(ListItem.Data).Value = 999 then
+                  subID := PErrorRec(ListItem.Data).id
+                else begin
+                  subID := NULL;
+                  SetLength(ErrV.Err, 0);  //на всякий случай :)
+                  SaveUndo(Code, Sequence);
+                // считываем Value ошибки
+                  New(err);
+                  err^ := PErrorRec(ListItem.Data)^;
+                  if err^.Value > 0 then
+                    err^.Value := (err^.Value * Scores[Sequence].Point/10);   //показываем максимальный штраф
+
+                  if err^.Ch then V := @ErrV;     //переменное значение - перенаправляем на ErrV
+                  SetLength(V^.Err, Length(V^.Err)+1); // добавлям ошибку в список Err оценки
+                  V^.Err[High(V^.Err)] := err^;
+
+                // CanChange=True значение надо ввести
+                  if err^.Ch then begin
+                    ErrV.Point := Round(err^.Value*10);
+                    ChangeMode(Code.Port, mValue);
+                    Dispose(err);
+                    Exit;
+                  end;
+                end
+              end;
+            end;  //1..9 if
+        else begin
+          subID := NULL;
+          TInfoThr.Create(Form,ATTANTIONMSG);
+        end;
+      end;
+      if (subID = NULL) then
+        ChangeMode(Code.Port, PortState[Code.Port].PredMode);
     end;
 end;
 
 // обработка меню управления,  согласно массива TASKMENU
 procedure EditMenuAction(Code: TPoint);
-var rs : integer;
+var i : integer;
 begin
   case Code.Key of
-    VK_NUMPAD0: begin  // вернуть крайнее изменение (Undo)
-                rs := Length(Undo[Code.Port]);
-                repeat
-                  if rs > 0 then begin
-                    PortState[Code.Port].Scores[Undo[Code.Port][rs-1].Position] := Undo[Code.Port][rs-1].Point;
-                    dec(rs);
-                    if Undo[Code.Port][rs].Chain then break;
-                  end
-                until rs = 0;
-                SetLength(Undo[Code.Port], rs);
+    VK_NUMPAD0: begin // откатить изменения (Undo)
+                  RestoreUnDo(Code);
               end;
     VK_NUMPAD1: begin  //показать жеребьевку
                 if CurrentMode in [mEdit, mFalse, mError] then
                    with TfJudgeConsol(PortState[Code.Port].Form) do
-                     PANELSVISIBLE := PANELSVISIBLE xor JC_DRAW;
+                     PANELSVISIBLE := PANELSVISIBLE xor PNL_DRAW;
               end;
-    VK_NUMPAD2: begin //Отделение по оператору (штраф -20)
-                 PortState[Code.Port].JudgeCall := PortState[Code.Port].JudgeCall xor JC_EXIT;
-                 Log.Add(Format(PENALTYMSG,[Code.Port]));
-               end;
+    VK_NUMPAD2: begin //Показать описание ошибок
+                  // форма с описание ошибок
+                  // Code|Description|Value
+              end;
     VK_NUMPAD3: begin //Запрос просмотра фрагмента по № фигуры
                  PortState[Code.Port].JudgeCall := PortState[Code.Port].JudgeCall xor JC_FRAME;
                  Log.Add(Format(REVIEWFRAMEMSG,[Code.Port, PortState[Code.Port].Sequence+1, 0]));
               end;
-    VK_NUMPAD4: begin  //Пропуск фигуры
-                 with PortState[Code.Port] do begin
-                   Scores[Sequence].Point := MAXPENALTY*10;
-                   // код пропуска определить и вставить
-                   Scores[Sequence].Err := '4';
-                 end;
+    VK_NUMPAD4: begin //Отделение по оператору (штраф -20)
+                 PortState[Code.Port].JudgeCall := PortState[Code.Port].JudgeCall xor JC_EXIT;
+                 Log.Add(Format(PENALTYMSG,[Code.Port]));
               end;
-    VK_NUMPAD5:   // сохранить результат
+    VK_NUMPAD5: begin  // сохранить результат
                 if CheckError(Code) then begin  // проверим ошибки перед сохранением
                    if SaveScores(Code) >= 0 then begin
                      ChangeMode(Code.Port, mConfirm);
                      with TfJudgeConsol(PortState[Code.Port].Form) do
-                       PANELSVISIBLE := PANELSVISIBLE or JC_MESSAGE;   // Вывести ЖДИТЕ!!!
+                       PANELSVISIBLE := PANELSVISIBLE or PNL_MESSAGE;   // Вывести ЖДИТЕ!!!
                    end
-                end
-                else TInfoThr.Create(PortState[Code.Port].Form,PENALTYERRORMSG);
-    VK_NUMPAD6: begin  //Скопировать оценки предыдущего просмотра в текущий
-                  for rs := 0 to MAXPOINTS do
-                    with PortState[Code.Port] do SwapVars2(Scores[rs], PScores[rs], SizeOf(TPoint));
-                  SetLength(Undo[Code.Port], 0);
                 end;
+              end;  
+    VK_NUMPAD6: begin  //Скопировать оценки предыдущего просмотра в текущий
+                with PortState[Code.Port] do begin
+                  for i := 0 to High(Scores) {MAXPOINTS} do
+                     SwapVars2(Scores[i], PScores[i], SizeOf(TPoint));
+                  SetLength(Undo, 0);  // Undo больше не работает
+                end;
+              end;  
     else TInfoThr.Create(PortState[Code.Port].Form,ATTANTIONMSG);
   end; //case
 end;
 
-// добавляем оценку к списку
-procedure AddDigit(Scan: TPoint; N:Shortint);
+// добавляем нажатие 0..9 к текущей оценке
+procedure AddDigit(Scan: TPoint; N:Shortint); {N-введенная цифра}
 begin
-  if (PortState[Scan.Port].Mode in [mReady, mStandby, mScoring, mEdit]) then begin
-    if (N >= 0) then  begin
-      with PortState[Scan.Port] do begin
-        Scan.Point := (Scores[Sequence].Point * 10 + N) mod 100;
-        if Scores[Sequence].Point = 10 then Scan.Point := 100;
-      end
-    end
-    else
-      Scan.Point := N;
-
-    if (CurrentMode in [mEdit]) then begin
-      with PortState[Scan.Port] do begin
-        Scan.Time := Scores[Sequence].Time;
-        SaveUndo(Scan, Sequence);  // сохранить изменение
-      end;
+  with PortState[Scan.Port] do begin
+    if (Mode in [mReady, mStandby, mScoring, mEdit, mValue]) then begin
+      if (N >= 0) then begin
+          Scan.Point := (V^.Point * 10 + N) mod 100;
+          if V^.Point = 10 then Scan.Point := 100;
+        end
+      else
+        Scan.Point := N;
     end;
-
-    with PortState[Scan.Port] do Scores[Sequence] := Scan;
-    // подсветка нажатия кнопки пульта
-    if (PortState[Scan.Port].Mode in [mStandby, mReady, mScoring]) then
-      fJudgeCtrl.HighLight(Scan, soPortNum);
+    if Mode = mEdit then begin
+        Scan.Time := V^.Time;
+        SaveUndo(V^, PortState[Scan.Port].Sequence);        
+    end;
+    V^.Port := Scan.Port;
+    V^.Key := Scan.Key;
+    V^.Point := Scan.Point;
+    V^.Time := Scan.Time;
+    // Err может быть не пустой!
   end;
 end;
 
@@ -779,80 +887,86 @@ procedure CodeAction(Code: TPoint);
 begin
   if (Code.Port < MAXPORTS) then begin
     case PortState[Code.Port].Mode of
-      mMenu, mError: begin
-          with TfJudgeConsol(PortState[Code.Port].Form) do
-            with pnlMenu do begin
-              Visible := not Visible;
-              if Visible then lvMenu.ViewStyle := vsList
-              else lvMenu.ViewStyle := vsReport;
-            end;
-            ChangeMode(Code.Port, PortState[Code.Port].PredMode);
-            if PortState[Code.Port].PredMode = mError then
-                 ErrorMenuAction(Code)
-            else case PortState[Code.Port].Mode of
-                   mEdit: EditMenuAction(Code);
-                   mConfirm: ConfirmMenuAction(Code);
-                   mReady, mStandby, mScoring, mFalse: ScoringMenuAction(Code);
-                   else ;
-                 end;
-         end;
+      mError: begin
+          ErrorMenuAction(Code);
+        end;
+      mMenu: begin
+        ChangeMode(Code.Port, PortState[Code.Port].PredMode);
+        case PortState[Code.Port].Mode of
+          mEdit: EditMenuAction(Code);
+          mConfirm: ConfirmMenuAction(Code);
+          mReady, mStandby, mScoring, mFalse: ScoringMenuAction(Code);
+          else ;
+        end;
+      end;
     else // во всех случаях
       if ProtectTime(Code) then // исключая дребезг контактов
        case Code.Key of
        VK_RETURN : begin
-                     case CurrentMode of
+                     case PortState[Code.Port].Mode {CurrentMode} of
                        mStandby: AddDigit(Code, 0);
                        mScoring: begin AddDigit(Code, 10); Right(Code) end;
                        mConfirm: SendMessage(TfJudgeConsol(PortState[Code.Port].Form).grdJumpResult.Handle, WM_HSCROLL, SB_PAGERIGHT, 0);
-                       mEdit: Right(Code);
+                       mEdit:  Right(Code);
+                       mValue: with PortState[Code.Port] do begin //возвращаемся после ввода ErrValue
+                         V := @Scores[Sequence]; //перенаправляем ввод на оценку
+                         if (TfJudgeConsol(Form).ErrV.Point < 1) or  //=0,1
+                            (TfJudgeConsol(Form).ErrV.Point/10 > Abs(TfJudgeConsol(Form).ErrV.Err[0].Value)) then begin // больше чем максимум
+                           TInfoThr.Create(Form, RANGEERRORMSG);
+//                           TfJudgeConsol(PortState[Code.Port].Form).ErrV
+                         end
+                         else begin // добавляем штраф к списку оценки
+                           SaveUndo(Code, Sequence);
+                           SetLength(Scores[Sequence].Err, Length(Scores[Sequence].Err)+1);
+                           Scores[Sequence].Err[High(Scores[Sequence].Err)] := TfJudgeConsol(Form).ErrV.Err[0];
+                           Scores[Sequence].Err[High(Scores[Sequence].Err)].Value := RoundTo(TfJudgeConsol(Form).ErrV.Point/10,-1);
+                         end;
+                         ChangeMode(Code.Port, mEdit);                         
+                       end; //mValue
                        else ;
                      end;
                    end;
-       VK_NUMPAD0: begin
-                      case  CurrentMode of
-                        mScoring: begin AddDigit(Code, 0); Right(Code); end;
-                        else AddDigit(Code, 0);
-                      end;
+       VK_NUMPAD0..VK_NUMPAD9: begin
+                    case PortState[Code.Port].Mode of
+                      mScoring: begin AddDigit(Code, (Code.Key-VK_NUMPAD0)*10); Right(Code); end;
+                      else AddDigit(Code, Code.Key-VK_NUMPAD0);
+                    end;
                    end;
-       VK_NUMPAD1..VK_NUMPAD9: begin
-                    if (CurrentMode in [mScoring]) then AddDigit(Code, (Code.Key-VK_NUMPAD0)*10)
-                    else AddDigit(Code, Code.Key-VK_NUMPAD0)
-                  end;
-       VK_ADD    : case CurrentMode of
+       VK_SUBTRACT: if PortState[Code.Port].Mode in [mEdit] then ChangeMode(Code.Port, mError);
+       VK_ADD    : case PortState[Code.Port].Mode of
                        mEdit: Left(Code);
                        mConfirm: SendMessage(TfJudgeConsol(PortState[Code.Port].Form).grdJumpResult.Handle, WM_HSCROLL, SB_PAGELEFT, 0);
                       else ;
                    end;
-       VK_BACK   : begin
-                      case CurrentMode of
+       VK_BACK   : case PortState[Code.Port].Mode of
                       mEdit, mConfirm: ChangeMode(Code.Port, mMenu);
                       mReady, mStandby, mScoring, mFalse:
                         if (StartPort = 0) or (Code.Port = StartPort) then Reset;
                       else ;
-                     end;
                    end;
-       VK_DECIMAL: begin AddDigit(Code, 0);     //Перепрыжка (НВ)
-                     with PortState[Code.Port] do begin
-                       Scores[Sequence].Err := NVErrorNumber;
-                       JudgeCall := JudgeCall or JC_NV;
-                       if (CurrentMode in [mScoring]) then Right(Code);
+       VK_DECIMAL: begin
+                     case PortState[Code.Port].Mode of
+                       mScoring: begin AddDigit(Code, 0); Right(Code); end;
+                       mEdit: begin AddDigit(Code, 0); AddDigit(Code, 0); end;
+                       else ;
                      end;
+                     //with PortState[Code.Port] do begin JudgeCall := JudgeCall or JC_NV; end;
                    end;
-       VK_DIVIDE : begin if CurrentMode in [mEdit] then Insert(Code) end;
-       VK_MULTIPLY:begin if CurrentMode in [mEdit] then Delete(Code) end;
-       VK_SUBTRACT:begin if CurrentMode in [mEdit] then ChangeMode(Code.Port, mError); end;
-       VK_UP     : begin InitMode(mEnd);  end;
+       VK_DIVIDE : begin if PortState[Code.Port].Mode in [mEdit] then Insert(Code) end;
+       VK_MULTIPLY:begin if PortState[Code.Port].Mode in [mEdit] then Delete(Code) end;
+       VK_UP     : begin InitMode(mEnd);  end; // немедленный выход без сохранения оценок
        else ; // другие кнопки игнорировать
       end;  //case
     end; //case
     Log.Add(Format(KEYPRESSMSG, [DateTimeToStr(Now),Code.Port, Code.Key, (Code.Time-StartTime)/1000000]));
 
-    case PortState[Code.Port].Mode of //выполнить процедуру каждый раз
+    case PortState[Code.Port].Mode of //каждый раз выполнить процедуру режима 
       mStandby: ModeStandby;
-      mEdit: ModeEdit(Code.Port);
+      mEdit   : ModeEdit(Code.Port);
       mConfirm: ModeConfirm(Code.Port);
-      mMenu: ModeMenu(Code.Port);
-      mError:ModeError(Code.Port);
+      mMenu   : ModeMenu(Code.Port);
+      mError  : ModeError(Code.Port);
+      mValue  : ModeValue(Code.Port);
       else ; //mIdle, mReady, mScoring, mFalse, mEnd
     end;
   end;
@@ -869,7 +983,7 @@ begin
       Scan.Point := 0;
       Scan.Key := Key;
       Scan.Time := CurrentVideoPosition; //фиксируем время нажатия кнопки   FFPlayer.CurrentPTS
-      Scan.Err := StringOfChar(' ', 6);
+      SetLength(Scan.Err,0);
       break;
     end;
   Result := Scan;
@@ -883,9 +997,10 @@ begin
   while Pos(',', S) > 0 do
     S[Pos(',', S)] := '-';
   Result := S;
+//  S := StringReplace(S,',','-',[rfReplaceAll]);
 end;
 
-//**********************************************
+//********************TInfoThr**************************
 constructor TInfoThr.Create;
 var W: integer;
 begin
@@ -922,12 +1037,11 @@ procedure TInfoThr.Hide;
 begin
   O.Free;
 end;
-//***********************************************
+//********************TInfoThr***************************
 
 // Выполняется при переключения режима
 procedure TfJudgeCtrl.ModeAction(AMode: TMode);
-var i, j : integer;
-    L : TLabel;
+var i, j, k : integer;
     S, R: string;
     T : TRect;
 begin
@@ -936,15 +1050,12 @@ begin
   mReady: begin
       CanJudge := true;
       InJudging := false;
-      SetLength(Undo, MAXPORTS, 0);
       DesktopCanvas := TCanvas.Create;
-
       for i := 0 to High(PortState) do
         with PortState[i] do begin
-          SetLength( Scores, MAXPOINTS+1 );   // Инициализация массива оценок
-          SetLength( PScores, MAXPOINTS+1 );  // Оценки предыдущего просмотра
-          TfJudgeConsol(Form).PANELSVISIBLE := Modes[CurrentMode].PANELS;
-          Form.Refresh;
+          SetLength(Scores, MAXPOINTS+1 );   // Инициализация массива оценок
+          SetLength(PScores, MAXPOINTS+1 );  // Оценки предыдущего просмотра
+          SetLength(Undo, 0);
         end;
     end;
   mStandby: begin
@@ -958,12 +1069,9 @@ begin
         lbTime.Caption := Format('%2.1f',[SimpleRoundTo(MAXTIME, -1)]);
 
       for i := 0 to High(PortState) do
-        with TfJudgeConsol(PortState[i].Form) do begin
-          if VIEWSCREEN then  PANELSVISIBLE := Modes[CurrentMode].PANELS
-          else PANELSVISIBLE := Modes[mReady].PANELS;
-          // подсветка активных пультов
-          if (StartPort = 0) or (i = StartPort) then HighLight(NewPoint(i));
-          Refresh;
+        with PortState[i] do begin
+          if VIEWSCREEN then TfJudgeConsol(Form).pnlDraw.Visible := false;
+          V := @Scores[Sequence];
         end;
 
     // задаем скорость просмотра
@@ -1004,12 +1112,9 @@ begin
         for j := PortState[i].Sequence to MINPOINTS-1 do
           if (PortState[i].Scores[j].Time = 0) then begin
             PortState[i].Scores[j] := NewPoint(i, StartTime+MAXTIME*1000000);
+            PortState[i].Scores[j].Point := Trunc(DataMain.MemPool.FieldByName('Value'+IntToStr(j+1)).AsFloat * 10);
           end;
-        // обновить название текущего режима
-        with TfJudgeConsol(PortState[i].Form) do begin
-          PANELSVISIBLE := Modes[CurrentMode].PANELS;
-          Refresh;
-        end;
+//        TfJudgeConsol(PortState[i].Form).Refresh;
       end;
     end;
   mConfirm: begin
@@ -1019,14 +1124,6 @@ begin
       with DataMain do begin
         //Подсчитать результат тура - результат записывается в RoundResult !!!
         qryCalcResult.ExecSQL;
-{        with tblTeamRound do
-          if Locate('Result_ID',ROUNDID,[]) then begin
-            Edit;
-            FieldByName('StartTime').AsInteger  := StartTime;
-//            FieldByName('ViewNumber').AsInteger := View;
-            Post;
-          end;
-}
         ReOpenDataset(tblTeamRound);
       end;
 
@@ -1079,12 +1176,7 @@ begin
         Post;
       end;
 }
-      for i := 0 to High(PortState) do
-        with TfJudgeConsol(PortState[i].Form) do begin
-          pnlMessage.Visible := false;    // закрыть надпись ЖДИТЕ!!!
-          PANELSVISIBLE := Modes[CurrentMode].PANELS;
-          Refresh;
-        end;
+
       // вывести оценки на трекбар
       ClearBreakpoint;
       MakeBreakpoint;
@@ -1094,18 +1186,8 @@ begin
       InJudging := false;
       StartTime := 0;
       FFPlayer.Pause;
-      for i := 0 to High(PortState) do
-        with TfJudgeConsol(PortState[i].Form) do begin
-          PANELSVISIBLE := Modes[CurrentMode].PANELS;
-          Refresh;
-        end;
-        L := TLabel(FindComponent('lbPoint'+IntToStr(i+1)));
-        if (abs(StartTime-PortState[i].Scores[0].Time)/1000 > CONCENSUSTIME) then begin
-          L.Color := Modes[CurrentMode].Color.clStart;
-          L.Caption := Format('%.0f',[(PortState[i].Scores[0].Time-StartTime)/1000]);
-          Log.Add(Format(FALSESTARTMSG,[DateTimeToStr(Now),i+1,PortState[i].Name, (PortState[i].Scores[0].Time-StartTime)/1000]));
-        end
-        else L.Color := Modes[CurrentMode].Color.clEnd;
+      if (abs(StartTime-PortState[i].Scores[0].Time)/1000 > CONCENSUSTIME) then
+        Log.Add(Format(FALSESTARTMSG,[DateTimeToStr(Now),i+1,PortState[i].Name, (PortState[i].Scores[0].Time-StartTime)/1000]));
     end;
   mEnd:  begin
       CanJudge := false;
@@ -1118,8 +1200,12 @@ begin
         with PortState[i] do begin
           Form.Free;
           Form := nil;
-          SetLength( Scores, 0 );
-          SetLength( PScores, 0 );
+          for k := 0 to High(Scores) do //удалить все штрафы
+            for j := Low(Scores[k].Err) to High(Scores[k].Err) do
+              SetLength(Scores[k].Err, 0);
+          SetLength(Scores, 0);
+          SetLength(PScores, 0);
+          SetLength(Undo, 0);
           Sequence := 0;
           JudgeCall := JC_NONE;
         end;
@@ -1140,7 +1226,7 @@ begin
       Log.Add(Format(BREAKMSG,[DateTimeToStr(Now)]));
       PageControl1.ActivePage := TabSheet1;      
     end;
-  else ; //для режимов mIdle, mMenu, mError - ниче не делать!
+  else ; //для режимов mIdle, mMenu, mValue, mError - ниче не делать!
   end;
 end;
 
@@ -1177,12 +1263,11 @@ end;
 
 procedure TfJudgeCtrl.FormCreate(Sender: TObject);
 var i : integer;
+  err : PErrorRec;
 begin
   FormID := Scoring_GUID;
-  Log := fMain.HistoryListBox.Lines;
-  DataJudge.qryList.Open;
 
-  // по количеству консолей
+  // консоль для старта таймера
   with StartTimerPorts.Items do begin
     Clear;
     Add('Все консоли');
@@ -1190,10 +1275,13 @@ begin
       Add(Format('%d консоль',[i+1]));
   end;
   StartTimerPorts.ItemIndex := 0;
+  Label4.Caption := pnlDrawCaption + ' (click to maximize)';
+  Log := fMain.HistoryListBox.Lines;
+  DataJudge.qryList.Open;
 
+  // считываем названия консолей
   // колонки таблицы оценок, зависит от типа соревнований
   ColumnsName := TStringList.Create;
-  // считываем названия консолей
   with DataMain.tblJudge do begin
     First;
     while (not EOF) do begin
@@ -1204,23 +1292,6 @@ begin
       end;
       Next;
     end
-  end;
-
-  // получить список меню ошибок
-  ErrorList := TStringList.Create;
-  with DataMain.tblErrors do begin
-    Open; First;
-    ErrorList.Add(Format('%s',[ERRORITEM0]));
-    while not EOF do begin
-      New(err);
-      err.ID := Fields[0].AsInteger;
-      err.Code := Fields[1].AsString;
-      err.NV := err.Code = 'NV';
-      ErrorList.AddObject(Fields[2].AsString, TObject(err));
-      if err.NV then NVErrorNumber := err.Code;
-      Next;
-    end;
-    Close;
   end;
 
   // Load dynamic link libraries
@@ -1265,10 +1336,6 @@ procedure TfJudgeCtrl.FormDestroy(Sender: TObject);
 var i: integer;
 begin
   FreeAndNil(ColumnsName);
-  // удаляем связные записи причин ошибок
-  for i := 0 to ErrorList.Count-1 do
-    Dispose(PErrorRec(ErrorList.Objects[i]));
-  FreeAndNil(ErrorList);
   for i := 0 to High(PortState) do
     with PortState[i] do begin
       Finalize( Scores );
@@ -1283,6 +1350,7 @@ begin
   with DataJudge do begin
     qryList.Close;
     tblViewDetail.EmptyTable;
+    tblViewError.EmptyTable;
     tblResultDetail.EmptyTable;
   end;
   InitMode(mEnd);
@@ -1488,7 +1556,7 @@ begin
   // works under Vista/7
   EnumWindows(@enumUserWindowsCB, Integer(@Result));
 end;
-{********************************************************}
+{************************TLevelThread***************************}
 
 type
   // audio level thread
@@ -1828,6 +1896,7 @@ begin
       POINTMASK := FieldByName('Mask').Value;
       MAXPOINTS := Length(POINTMASK);
       MINPOINTS := FieldByName('MQP').Value;
+      TYPEID := FieldByName('Type_ID').AsInteger;
       ColumnsName.CommaText := FieldByName('Columns').AsString;
       // проверка разрешенного типа соревнования
       if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then begin
@@ -1852,7 +1921,6 @@ begin
          SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
       Params[0].AsInteger := ROUNDID;
     end;
-
   {запросы ведомостей оценок, времени и ошибок}
     with DataJudge.qryScore do begin
       SQL.Clear;
@@ -1875,7 +1943,6 @@ begin
 
   for i := 0 to High(PortState) do begin
     // Показывает состояние только подключенные консолей
-    TLabel(FindComponent('lbPoint'+IntToStr(i+1))).Visible := true;
     with PortState[i] do
       if Form = nil then begin
         Form := TfJudgeConsol.Create(Self);
@@ -1973,9 +2040,10 @@ procedure TfJudgeCtrl.btnSaveClick(Sender: TObject);
 begin
    {сохранить результат из Memory в базу}
   with TABSQuery.Create(Self) do begin
-    SQL.Add('INSERT INTO ViewDetail SELECT v.Result_ID, v.Monitor, v.Sequence, v.Point, v.ATime, v.Error_ID, jr.Judge_ID');
+    SQL.Add('INSERT INTO ViewDetail SELECT v.Result_ID, v.Monitor, v.Sequence, v.Point, v.ATime, jr.Judge_ID');
     SQL.Add('FROM MEMORY ViewDetail v LEFT JOIN (SELECT Result_ID, Judge_ID, Port-1 Monitor, IsTrainee FROM RoundResult r, Judges j ');
     SQL.Add(' WHERE Port IS NOT NULL AND r.Competition_ID=j.Competition_ID  AND r.Result_ID=:Result_ID) jr ON (v.Monitor=jr.Monitor);');
+    SQL.Add('INSERT INTO ViewError SELECT * FROM MEMORY ViewError; DELETE FROM MEMORY ViewError;');
     SQL.Add('INSERT INTO ResultDetail SELECT * FROM MEMORY ResultDetail;');
     SQL.Add('DELETE FROM MEMORY ViewDetail; DELETE FROM MEMORY ResultDetail;');
     SQL.Add('UPDATE RoundResult rr SET JudgeTime=Now,ViewNumber =:ViewNumber, StartTime = :StartTime WHERE rr.Result_ID=:Result_ID');
@@ -2062,7 +2130,7 @@ begin
     with dlDivePool do begin
       List1.DelimitedText := DataJudge.qryList.FieldByName('Pool_Sequence').AsString;
       List2.Clear;
-      if Execute and (List1.Count=0) then
+      if Execute and ((List1.Count=0) or ((List2.Count>=3) and (List2.Count<=5))) then
         with DataMain.tblTeamRound do begin
           Open;
           if Locate('Result_ID',DataJudge.qryList.FieldByName('Result_ID').AsInteger,[]) then begin
@@ -2131,6 +2199,28 @@ end;
 procedure TfJudgeCtrl.N2Click(Sender: TObject);
 begin
   ComboBox2.ItemIndex := TDBGrid(Sender).SelectedIndex+2;
+end;
+
+procedure TfJudgeCtrl.BitBtn1Click(Sender: TObject);
+var
+  C : Int64;
+begin
+  C := CurrentVideoPosition + TButton(Sender).Tag * 1000000;
+  if C < 0 then C := 0;
+  if C > FDuration then C := FDuration;
+  FFPlayer.Seek(C); //тупит когда веред :(
+end;
+
+procedure TfJudgeCtrl.Label4Click(Sender: TObject);
+begin
+  if  pnlDraw.Height = Label4.Height then begin
+    Label4.Caption := pnlDrawCaption + ' (click to minimize)';
+    pnlDraw.Height := 208;
+  end
+  else begin
+    Label4.Caption := pnlDrawCaption + ' (click to maximize)';
+    pnlDraw.Height := Label4.Height;
+  end;
 end;
 
 end.

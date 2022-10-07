@@ -35,7 +35,18 @@ object DataJudge: TDataJudge
       end
       item
         Name = 'Error_ID'
-        DataType = ftInteger
+        DataType = ftString
+        Size = 20
+      end
+      item
+        Name = 'Error_Code'
+        DataType = ftString
+        Size = 20
+      end
+      item
+        Name = 'Error_Value'
+        DataType = ftString
+        Size = 20
       end
       item
         Name = 'Judge_ID'
@@ -408,7 +419,7 @@ object DataJudge: TDataJudge
         '--  LEFT JOIN MEMORY ViewDetail v ON (jr.Result_ID=v.Result_ID  ' +
         'AND v.Monitor=jr.Port-1)'
       'GROUP BY jr.Result_ID, jr.IsTrainee, jr.Judge_ID, jr.Monitor')
-    Left = 224
+    Left = 240
     Top = 16
     ParamData = <
       item
@@ -439,7 +450,7 @@ object DataJudge: TDataJudge
       
         'AND not EXISTS (SELECT * FROM ResultDetail rd WHERE rr.Result_ID' +
         '=rd.Result_ID)')
-    Left = 216
+    Left = 232
     Top = 104
     ParamData = <
       item
@@ -450,7 +461,7 @@ object DataJudge: TDataJudge
   end
   object dsList: TDataSource
     DataSet = qryList
-    Left = 216
+    Left = 232
     Top = 160
   end
   object qryScore: TABSQuery
@@ -564,12 +575,12 @@ object DataJudge: TDataJudge
     TableName = 'Sequence'
     Exclusive = False
     MasterFields = 'Round_ID'
-    Left = 290
+    Left = 306
     Top = 104
   end
   object dsSequence: TDataSource
     DataSet = tblSequence
-    Left = 288
+    Left = 304
     Top = 160
   end
   object qrySequence: TABSQuery
@@ -593,7 +604,7 @@ object DataJudge: TDataJudge
         'ID AND rr.Result_ID=:Result_ID'
       'AND c.Pool_ID=p.Pool_ID AND IMG>0'
       'order by IMG')
-    Left = 288
+    Left = 304
     Top = 16
     ParamData = <
       item
@@ -601,5 +612,37 @@ object DataJudge: TDataJudge
         Name = 'Result_ID'
         ParamType = ptUnknown
       end>
+  end
+  object tblViewError: TABSTable
+    CurrentVersion = '7.90 '
+    DatabaseName = 'MEMORY'
+    InMemory = True
+    ReadOnly = False
+    StoreDefs = True
+    FieldDefs = <
+      item
+        Name = 'Result_ID'
+        DataType = ftInteger
+      end
+      item
+        Name = 'Monitor'
+        DataType = ftSmallint
+      end
+      item
+        Name = 'Sequence'
+        DataType = ftSmallint
+      end
+      item
+        Name = 'Error_ID'
+        DataType = ftInteger
+      end
+      item
+        Name = 'Value'
+        DataType = ftFloat
+      end>
+    TableName = 'ViewError'
+    Exclusive = False
+    Left = 168
+    Top = 16
   end
 end

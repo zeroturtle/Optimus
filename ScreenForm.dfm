@@ -54,7 +54,7 @@ object fJudgeConsol: TfJudgeConsol
       Align = alTop
       AutoSize = False
       Caption = #1046#1077#1088#1077#1073#1100#1077#1074#1082#1072' '#1090#1091#1088#1072
-      Color = clBackground
+      Color = clTeal
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -16
@@ -207,7 +207,7 @@ object fJudgeConsol: TfJudgeConsol
       Align = alTop
       AutoSize = False
       Caption = #1056#1077#1079#1091#1083#1100#1090#1072#1090#1099
-      Color = clBackground
+      Color = clTeal
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -16
@@ -712,7 +712,7 @@ object fJudgeConsol: TfJudgeConsol
       Align = alTop
       AutoSize = False
       Caption = #1056#1077#1076#1072#1082#1090#1086#1088' '#1086#1094#1077#1085#1086#1082
-      Color = clBackground
+      Color = clTeal
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -16
@@ -773,7 +773,7 @@ object fJudgeConsol: TfJudgeConsol
       Align = alTop
       AutoSize = False
       Caption = #1044#1086#1089#1090#1091#1087#1085#1099#1077' '#1076#1077#1081#1089#1090#1074#1080#1103
-      Color = clBackground
+      Color = clTeal
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -16
@@ -817,5 +817,27 @@ object fJudgeConsol: TfJudgeConsol
     ParentFont = False
     TabOrder = 4
     Visible = False
+  end
+  object qryErrors: TABSQuery
+    CurrentVersion = '7.90 '
+    DatabaseName = 'dbJudge'
+    InMemory = False
+    ReadOnly = False
+    SQL.Strings = (
+      'SELECT * FROM Errors '
+      'WHERE Type_ID=:Type_ID and subID=:subID')
+    Left = 80
+    Top = 480
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'Type_ID'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftUnknown
+        Name = 'subID'
+        ParamType = ptUnknown
+      end>
   end
 end

@@ -306,6 +306,7 @@ type
     tblPoolImage2: TBlobField;
     tblPoolImage3: TBlobField;
     tblPoolPoolName: TStringField;
+    tblPoolValue: TFloatField;
     procedure tblCompetition2BeforeClose(DataSet: TDataSet);
     procedure tblRoundResultBeforeOpen(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
@@ -648,7 +649,9 @@ begin
       DatabaseName :=  'dbJudge';
   {удалить предыдущий результат чтоб начать судить повторно}
       SQL.Clear;
-      SQL.Add('DELETE FROM resultdetail WHERE Result_ID=:CCC; DELETE FROM ViewDetail WHERE Result_ID=:DDD');
+      SQL.Add('DELETE FROM resultdetail WHERE Result_ID=:Result_ID;');
+      SQL.Add('DELETE FROM ViewDetail WHERE Result_ID=:Result_ID;');
+      SQL.Add('DELETE FROM ViewError WHERE Result_ID=:Result_ID;');
       Prepare;
       for j := 0 to ParamCount-1 do Params[j].AsInteger := DataSet.FieldByName('Result_ID').AsInteger;
       ExecSQL;
@@ -679,27 +682,36 @@ begin
   MemPool.FieldByName('Pool_Sequence').AsString := tblRound.FieldByName('Pool_Sequence_Code').AsString;
 end;
 
+// ВАЖНО! первая картинка всегда должна быть указана
+// если картинки нет - тогда загрузить NoImage
 procedure TDataMain.qryPoolAfterOpen(DataSet: TDataSet);
 var i, Cnt : integer;
     StreamBlob: TStream;
+    L : boolean;
 begin
   Cnt := 0;
   with MemPool do begin
-    Close;
+    Close;              
     EmptyTable;
     Open;
     if not Locate('Round_ID',tblRound.FieldByName('Round_ID').AsInteger,[]) then begin
       Append;
       qryPool.First;
       while not qryPool.Eof do  begin
+        L := true;
         for i := 1 to 3 do
           if (not qryPool.FieldByName('Image'+IntToStr(i)).IsNull) then begin
+            if Cnt>=9 then continue;
             inc(Cnt);
             try
               StreamBlob := qryPool.CreateBlobStream(qryPool.FieldByName('Image'+IntToStr(i)),bmRead);
               with MemPool.CreateBlobStream(MemPool.FieldByName('Pic'+IntToStr(Cnt)),bmWrite) do
                 try
                   CopyFrom(StreamBlob,StreamBlob.Size);
+                  if L then begin
+                    MemPool.FieldByName('Value'+IntToStr(Cnt)).AsFloat := qryPool.FieldByName('Value').AsFloat;
+                    L := false;
+                  end;
                 finally
                   Free;
                 end;
@@ -707,14 +719,14 @@ begin
               StreamBlob.Free;
             end;
           end
-          else
+          else begin
             break;
-          qryPool.Next;
+          end;
+        qryPool.Next;
       end;
       FieldByName('CountPic').AsInteger := Cnt;
       Post;
     end;
-    Open;
   end;
 end;
 
@@ -836,10 +848,13 @@ begin
     try
       DatabaseName :=  'dbJudge';
       SQL.Clear;
-      SQL.Add('DELETE FROM ViewDetail WHERE Result_ID=:DDD AND Monitor=:AAA');
+      SQL.Add('DELETE FROM ViewDetail WHERE Result_ID=:Result_ID AND Monitor=:Monitor;');
+      SQL.Add('DELETE FROM ViewError WHERE Result_ID=:Result_ID AND Monitor=:Monitor;');
       Prepare;
       Params[0].AsInteger := DataSet.FieldByName('Result_ID').AsInteger;
       Params[1].AsInteger := DataSet.FieldByName('Monitor').AsInteger;
+      Params[2].AsInteger := DataSet.FieldByName('Result_ID').AsInteger;
+      Params[3].AsInteger := DataSet.FieldByName('Monitor').AsInteger;
       ExecSQL;
     finally
       Free;

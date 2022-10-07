@@ -222,7 +222,7 @@ begin
         if DataMain.qryGetQuery.Locate('Query_ID',Query_ID,[]) then begin
           SQL.Clear;
           SQL.Add( DataMain.qryGetQuery.FieldByName('Query_SQL').Value );
-          if Query_ID=6 then
+          if Query_ID in [6,14,15,16,17] then
             SQL.DelimitedText := StringReplace(SQL.DelimitedText,'MEMORY','',[rfReplaceAll,rfIgnoreCase]);
         end;
           

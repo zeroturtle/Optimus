@@ -8,6 +8,10 @@ uses
 
 type
 
+  TColorPair = record
+    ClStart, ClEnd : TColor;
+  end;
+
 //Wait thread declaration
   TWaitThr = class(TThread)
   private
