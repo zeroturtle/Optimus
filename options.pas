@@ -25,10 +25,6 @@ type
     cxSpinEdit4: TcxSpinEdit;
     Label7: TLabel;
     Label8: TLabel;
-    cxSpinEdit5: TcxSpinEdit;
-    Label9: TLabel;
-    Label10: TLabel;
-    cxSpinEdit6: TcxSpinEdit;
     Label2: TLabel;
     RadioGroup1: TRadioGroup;
     Button1: TButton;
@@ -75,6 +71,7 @@ type
 var
   fOptions: TfOptions;
 
+
 implementation
 
 uses constant, Unit5;
@@ -94,21 +91,17 @@ begin
   end;
 end;
 
+// устанавливаем значения Controls из текущих переменных 
 procedure TfOptions.FormCreate(Sender: TObject);
 begin
-  OptionsList.Clear;
   cxSpinEdit1.Value := MAXPORTS;
   cxSpinEdit2.Value := PLAYBACKSPEED;
   cxSpinEdit3.Value := CONCENSUSTIME;
   cxSpinEdit4.Value := _PUSHPROTECTPERIOD;
-  cxSpinEdit5.Value := MAXVALUE;
-  cxSpinEdit6.Value := MAXPENALTY;
   CheckBox1.Checked := USEFTP;
   if VIEWSCREEN then RadioGroup1.ItemIndex := 1 else RadioGroup1.ItemIndex := 0;
   cxSpinEdit7.Value := FIRSTJUDGEMONITORNUM;
-
   DirectoryEdit1.Text := VIDEODIRECTORY;
-  Caption := 'Настройки для БД "'+DATABASEFILE+'"';
 end;
 
 procedure TfOptions.btnOKClick(Sender: TObject);
@@ -120,43 +113,21 @@ begin
     MAXPORTS := cxSpinEdit1.Value;
   PLAYBACKSPEED := cxSpinEdit2.Value;
   CONCENSUSTIME := cxSpinEdit3.Value;
-//  PUSHPROTECTPERIOD := cxSpinEdit4.Value;
   VIDEODIRECTORY := DirectoryEdit1.Text;
-  MAXVALUE := cxSpinEdit5.Value;
-  MAXPENALTY := cxSpinEdit6.Value;
   VIEWSCREEN := RadioGroup1.ItemIndex = 1;
   if VIEWSCREEN then FIRSTJUDGEMONITORNUM := cxSpinEdit7.Value else FIRSTJUDGEMONITORNUM := 2;
   USEFTP := CheckBox1.Checked;
-  with OptionsList do begin
-    Add(IntToStr(MAXPORTS));
-    Add(IntToStr(PLAYBACKSPEED));
-    Add(IntToStr(CONCENSUSTIME));
-    Add(IntToStr(_PUSHPROTECTPERIOD));
-    Add(VIDEODIRECTORY);
-    Add(IntToStr(MAXVALUE));
-    Add(IntToStr(MAXPENALTY));
-    Add(BoolToStr(VIEWSCREEN,true));
-    Add(BoolToStr(USEFTP,true));
-  end;
   with DataMain.tblCompetition do begin
     Edit;
-    FieldByName('Options').AsString := OptionsList.CommaText;
+    FieldByName('Options').AsString := SetOptions;
     Post;
   end;
 end;
 
+// параменты по умолчанию
 procedure TfOptions.Button1Click(Sender: TObject);
 begin
-  MAXPORTS := 1;
-  PLAYBACKSPEED := _PLAYBACKSPEED;
-  CONCENSUSTIME := _CONCENSUSTIME;
-//  _PUSHPROTECTPERIOD не меняется
-  VIDEODIRECTORY := _VIDEODIRECTORY;
-  MAXVALUE := DataMain.tblType.FieldByName('MaxValue').AsInteger; //_MAXVALUE;
-  MAXPENALTY := DataMain.tblType.FieldByName('MaxPenalty').AsInteger; //_MAXPENALTY;
-  VIEWSCREEN := false;
-  USEFTP  := false;
-  FIRSTJUDGEMONITORNUM := 2;
+  DefaultOptions;
   FormCreate(Sender);
 end;
 
@@ -171,12 +142,5 @@ begin
   if Text[length(Text)] <> '\' then
     Text := Text+'\';
 end;
-
-
-
-begin
-
-  OptionsList := TStringList.Create;
-
 
 end.

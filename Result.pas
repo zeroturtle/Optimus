@@ -58,7 +58,6 @@ type
     grdDetailDBTableView1Column31: TcxGridDBColumn;
     grdDetailDBTableView1Column32: TcxGridDBColumn;
     ToolButton2: TToolButton;
-    ToolButton3: TToolButton;
     grd_GeneralDBTableView1Column3: TcxGridDBColumn;
     grd_GeneralDBTableView1Column6: TcxGridDBColumn;
     grd_GeneralDBTableView1Column7: TcxGridDBColumn;
@@ -140,13 +139,6 @@ begin
           end;
           ReOpenDataset(ds_General.DataSet);
         end;
-    12: begin
-          //Форма Редактировать оценку
-          with TfScoreEdit.Create(Self) do
-            if ShowModal = mrOK then begin
-              // пересчитать результат
-            end;
-        end;
   end;
 end;
 
@@ -161,10 +153,12 @@ begin
   ColumnsName := TStringList.Create;
   ColumnsName.CommaText := DataMain.tblTeamRoundColumns.AsString;
   for i:=0 to grdDetailDBTableView1.ColumnCount-1 do
-    if i <= ColumnsName.Count-1 then begin
-      grdDetailDBTableView1.Columns[i].Visible := true;    
-      grdDetailDBTableView1.Columns[i+2].Caption := ColumnsName[i];
-      grdDetailDBTableView1.Columns[i+2].Width := Canvas.TextWidth(ColumnsName[i])+20;
+    if i <= ColumnsName.Count-1 + 2 then begin
+      grdDetailDBTableView1.Columns[i].Visible := true;
+      if i >= 2 then begin
+        grdDetailDBTableView1.Columns[i].Caption := ColumnsName[i-2];
+        grdDetailDBTableView1.Columns[i].Width := Canvas.TextWidth(ColumnsName[i-2])+20;
+      end;
     end
     else
       grdDetailDBTableView1.Columns[i].Visible := false;

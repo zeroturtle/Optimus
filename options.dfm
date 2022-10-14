@@ -3,7 +3,7 @@ object fOptions: TfOptions
   Top = 139
   BorderStyle = bsDialog
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-  ClientHeight = 413
+  ClientHeight = 369
   ClientWidth = 448
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -29,20 +29,6 @@ object fOptions: TfOptions
     Width = 110
     Height = 26
     Caption = #1050#1086#1083#1080#1095#1077#1089#1090#1074#1086' '#1082#1086#1085#1089#1086#1083#1077#1081#13#10'Judges Qty'
-  end
-  object Label10: TLabel
-    Left = 224
-    Top = 209
-    Width = 115
-    Height = 26
-    Caption = #1052#1072#1082#1089#1080#1084#1072#1083#1100#1085#1099#1081' '#1096#1090#1088#1072#1092#13#10'Maximum Penalty'
-  end
-  object Label9: TLabel
-    Left = 16
-    Top = 216
-    Width = 116
-    Height = 13
-    Caption = #1052#1072#1082#1089#1080#1084#1072#1083#1100#1085#1072#1103' '#1086#1094#1077#1085#1082#1072
   end
   object Label8: TLabel
     Left = 304
@@ -81,14 +67,14 @@ object fOptions: TfOptions
   end
   object Label19: TLabel
     Left = 176
-    Top = 336
+    Top = 304
     Width = 221
     Height = 13
     Caption = '('#1090#1088#1077#1073#1091#1077#1090#1089#1103' '#1076#1083#1103' '#1088#1072#1073#1086#1090#1099'  Vanguard  '#1080'  Zodiak)'
   end
   object Panel3: TPanel
     Left = 0
-    Top = 376
+    Top = 332
     Width = 448
     Height = 37
     Align = alBottom
@@ -259,31 +245,13 @@ object fOptions: TfOptions
       ImageIndex = 1
     end
   end
-  object cxSpinEdit6: TcxSpinEdit
-    Left = 352
-    Top = 212
-    Properties.MaxValue = -1.000000000000000000
-    Properties.MinValue = -3.000000000000000000
-    TabOrder = 2
-    Value = -1
-    Width = 65
-  end
-  object cxSpinEdit5: TcxSpinEdit
-    Left = 144
-    Top = 212
-    Properties.MaxValue = 10.000000000000000000
-    Properties.MinValue = 1.000000000000000000
-    TabOrder = 3
-    Value = 10
-    Width = 65
-  end
   object cxSpinEdit4: TcxSpinEdit
     Left = 216
     Top = 132
     Enabled = False
     Properties.Increment = 100.000000000000000000
     Properties.MaxValue = 1000.000000000000000000
-    TabOrder = 4
+    TabOrder = 2
     Value = 200
     Width = 73
   end
@@ -296,7 +264,7 @@ object fOptions: TfOptions
     NumGlyphs = 1
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 5
+    TabOrder = 3
     OnExit = DirectoryEdit1Exit
   end
   object cxSpinEdit3: TcxSpinEdit
@@ -305,36 +273,36 @@ object fOptions: TfOptions
     Enabled = False
     Properties.Increment = 100.000000000000000000
     Properties.MaxValue = 1000.000000000000000000
-    TabOrder = 6
+    TabOrder = 4
     Value = 150
     Width = 73
   end
   object RadioGroup1: TRadioGroup
     Left = 16
-    Top = 246
+    Top = 214
     Width = 409
     Height = 73
     Caption = ' '#1055#1088#1086#1089#1084#1086#1090#1088' '#1074#1080#1076#1077#1086'  (Screen Control) '
     Items.Strings = (
       #1053#1072' '#1075#1083#1072#1074#1085#1086#1084' '#1086#1082#1085#1077'  (Main Window)'
       #1053#1072' '#1101#1082#1088#1072#1085#1072#1093' '#1082#1086#1085#1089#1086#1083#1077#1081' (Judges Consol)')
-    TabOrder = 7
+    TabOrder = 5
     OnClick = RadioGroup1Click
   end
   object CheckBox1: TCheckBox
     Left = 16
-    Top = 336
+    Top = 304
     Width = 161
     Height = 17
     Caption = #1042#1082#1083#1102#1095#1080#1090#1100' TFTP'
-    TabOrder = 8
+    TabOrder = 6
     WordWrap = True
   end
   object cxSpinEdit7: TcxSpinEdit
     Left = 328
-    Top = 288
+    Top = 256
     Enabled = False
-    TabOrder = 9
+    TabOrder = 7
     Value = 1
     Width = 65
   end
@@ -343,7 +311,7 @@ object fOptions: TfOptions
     Top = 16
     Properties.MaxValue = 5.000000000000000000
     Properties.MinValue = 1.000000000000000000
-    TabOrder = 10
+    TabOrder = 8
     Value = 1
     Width = 73
   end
@@ -352,7 +320,7 @@ object fOptions: TfOptions
     Top = 54
     Properties.MaxValue = 90.000000000000000000
     Properties.MinValue = 50.000000000000000000
-    TabOrder = 11
+    TabOrder = 9
     Value = 70
     Width = 73
   end

@@ -1,8 +1,8 @@
 object fJudgeCtrl: TfJudgeCtrl
-  Left = 527
-  Top = 94
-  Width = 1365
-  Height = 950
+  Left = 568
+  Top = 123
+  Width = 1280
+  Height = 748
   Caption = #1050#1086#1085#1089#1086#1083#1100' '#1091#1087#1088#1072#1074#1083#1077#1085#1080#1103
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,8 +22,8 @@ object fJudgeCtrl: TfJudgeCtrl
   TextHeight = 13
   object Splitter1: TSplitter
     Left = 0
-    Top = 701
-    Width = 1349
+    Top = 684
+    Width = 1264
     Height = 3
     Cursor = crVSplit
     Align = alBottom
@@ -31,8 +31,8 @@ object fJudgeCtrl: TfJudgeCtrl
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1349
-    Height = 701
+    Width = 1264
+    Height = 684
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
@@ -44,15 +44,15 @@ object fJudgeCtrl: TfJudgeCtrl
       object Label1: TLabel
         Left = 0
         Top = 0
-        Width = 1341
+        Width = 1256
         Height = 13
         Align = alTop
         Caption = #1042#1048#1044#1045#1054' '#1044#1051#1071' '#1054#1062#1045#1053#1050#1048
       end
       object Panel3: TPanel
         Left = 0
-        Top = 621
-        Width = 1341
+        Top = 604
+        Width = 1256
         Height = 70
         Align = alBottom
         BevelOuter = bvNone
@@ -102,12 +102,21 @@ object fJudgeCtrl: TfJudgeCtrl
           ItemHeight = 13
           TabOrder = 3
         end
+        object Button3: TButton
+          Left = 1068
+          Top = 16
+          Width = 110
+          Height = 40
+          Caption = #1055#1086#1082#1072#1079#1072#1090#1100' '#1087#1086#1089#1083#1076
+          TabOrder = 4
+          OnClick = Button3Click
+        end
       end
       object grdList: TDBGrid
         Left = 0
         Top = 13
-        Width = 1341
-        Height = 608
+        Width = 1256
+        Height = 591
         Align = alClient
         DataSource = DataJudge.dsList
         TabOrder = 1
@@ -154,24 +163,26 @@ object fJudgeCtrl: TfJudgeCtrl
       object pnlPerview: TPanel
         Left = 0
         Top = 0
-        Width = 1341
-        Height = 621
+        Width = 1256
+        Height = 419
         Align = alClient
         Caption = 'pnlPerview'
         TabOrder = 0
       end
       object pnlOptions: TPanel
         Left = 0
-        Top = 621
-        Width = 1341
+        Top = 419
+        Width = 1256
         Height = 70
         Align = alBottom
         TabOrder = 1
         object lbTime: TLabel
-          Left = 795
-          Top = 12
-          Width = 110
-          Height = 50
+          Left = 1136
+          Top = 1
+          Width = 119
+          Height = 68
+          Align = alRight
+          Alignment = taCenter
           AutoSize = False
           Caption = '00.00'
           Color = clGray
@@ -182,6 +193,7 @@ object fJudgeCtrl: TfJudgeCtrl
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
+          Layout = tlCenter
         end
         object Label2: TLabel
           Left = 13
@@ -197,114 +209,59 @@ object fJudgeCtrl: TfJudgeCtrl
           Height = 13
           Caption = 'lbView'
         end
-        object GroupBox3: TGroupBox
-          Left = 384
-          Top = 8
-          Width = 385
-          Height = 56
-          Caption = #1040#1082#1090#1080#1074#1085#1086#1089#1090#1100' '#1089#1091#1076#1077#1081#1089#1082#1080#1093' '#1082#1086#1085#1089#1086#1083#1077#1081
-          TabOrder = 0
-          object lbPoint1: TLabel
-            Left = 12
-            Top = 22
-            Width = 57
-            Height = 20
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'lbPoint1'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'MS Sans Serif'
-            Font.Style = []
-            ParentFont = False
-            Visible = False
-          end
-          object lbPoint5: TLabel
-            Left = 304
-            Top = 22
-            Width = 57
-            Height = 20
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'lbPoint5'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'MS Sans Serif'
-            Font.Style = []
-            ParentFont = False
-            Visible = False
-          end
-          object lbPoint4: TLabel
-            Left = 231
-            Top = 22
-            Width = 57
-            Height = 20
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'lbPoint4'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'MS Sans Serif'
-            Font.Style = []
-            ParentFont = False
-            Visible = False
-          end
-          object lbPoint3: TLabel
-            Left = 158
-            Top = 22
-            Width = 57
-            Height = 20
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'lbPoint3'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'MS Sans Serif'
-            Font.Style = []
-            ParentFont = False
-            Visible = False
-          end
-          object lbPoint2: TLabel
-            Left = 85
-            Top = 22
-            Width = 57
-            Height = 20
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'lbPoint2'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'MS Sans Serif'
-            Font.Style = []
-            ParentFont = False
-            Visible = False
-          end
-        end
         object btnPause: TBitBtn
           Left = 136
           Top = 16
           Width = 121
           Height = 40
           Caption = #1055#1072#1091#1079#1072
-          TabOrder = 1
+          TabOrder = 0
           TabStop = False
           OnClick = btnPauseClick
         end
         object chkVerticalFlip: TCheckBox
-          Left = 280
+          Left = 272
           Top = 32
-          Width = 97
+          Width = 81
           Height = 17
           Hint = #1055#1077#1088#1077#1074#1077#1088#1085#1091#1090#1100' '#1074#1080#1076#1077#1086' '#1085#1072' 180'
           TabStop = False
           Caption = 'VerticalFlip'
-          TabOrder = 2
+          TabOrder = 1
           OnClick = chkVerticalFlipClick
+        end
+        object BitBtn1: TBitBtn
+          Tag = 5
+          Left = 352
+          Top = 16
+          Width = 121
+          Height = 40
+          Caption = '5'#1089#1077#1082' >>'
+          TabOrder = 2
+          TabStop = False
+          OnClick = BitBtn1Click
+        end
+        object BitBtn2: TBitBtn
+          Tag = 15
+          Left = 488
+          Top = 16
+          Width = 121
+          Height = 40
+          Caption = '15'#1089#1077#1082' >>'
+          TabOrder = 3
+          TabStop = False
+          OnClick = BitBtn1Click
+        end
+        object BitBtn3: TBitBtn
+          Tag = -5
+          Left = 624
+          Top = 16
+          Width = 121
+          Height = 40
+          Caption = '<< 5'#1089#1077#1082
+          TabOrder = 4
+          TabStop = False
+          OnClick = BitBtn1Click
         end
       end
     end
@@ -356,7 +313,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object grdScore: TDBGrid
         Left = 0
         Top = 13
-        Width = 1341
+        Width = 1256
         Height = 152
         Align = alTop
         DataSource = DataJudge.dsScore
@@ -371,7 +328,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object grdError: TDBGrid
         Left = 0
         Top = 178
-        Width = 1341
+        Width = 1256
         Height = 152
         Align = alTop
         DataSource = DataJudge.dsTime
@@ -386,7 +343,7 @@ object fJudgeCtrl: TfJudgeCtrl
       object grdTime: TDBGrid
         Left = 0
         Top = 343
-        Width = 1341
+        Width = 1256
         Height = 152
         Align = alTop
         DataSource = DataJudge.dsError
@@ -399,8 +356,8 @@ object fJudgeCtrl: TfJudgeCtrl
       end
       object Panel1: TPanel
         Left = 0
-        Top = 621
-        Width = 1341
+        Top = 604
+        Width = 1256
         Height = 70
         Align = alBottom
         TabOrder = 3
@@ -487,9 +444,9 @@ object fJudgeCtrl: TfJudgeCtrl
   end
   object pnlDraw: TPanel
     Left = 0
-    Top = 704
-    Width = 1349
-    Height = 208
+    Top = 687
+    Width = 1264
+    Height = 23
     Align = alBottom
     BorderWidth = 1
     Caption = #1046#1077#1088#1077#1073#1100#1077#1074#1082#1072' '#1090#1091#1088#1072
@@ -497,12 +454,11 @@ object fJudgeCtrl: TfJudgeCtrl
     object Label4: TLabel
       Left = 2
       Top = 2
-      Width = 1345
+      Width = 1260
       Height = 23
       Align = alTop
       AutoSize = False
-      Caption = #1046#1077#1088#1077#1073#1100#1077#1074#1082#1072' '#1090#1091#1088#1072
-      Color = clBackground
+      Color = clTeal
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -16
@@ -510,6 +466,7 @@ object fJudgeCtrl: TfJudgeCtrl
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
+      OnClick = Label4Click
     end
     object DBImage2: TDBImage
       Left = 160

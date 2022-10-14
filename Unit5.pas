@@ -361,6 +361,7 @@ type
     procedure tblMemberResultBeforeDelete(DataSet: TDataSet);
     procedure tblResultDetail1AfterDelete(DataSet: TDataSet);
     procedure tblRoundAfterPost(DataSet: TDataSet);
+    procedure tblEventAfterPost(DataSet: TDataSet);
   private
     { Private declarations }
   public
@@ -372,6 +373,9 @@ var
 
 procedure Explode(var a: array of string; Border, S: string);
 procedure ReOpenDataset(DataSet: TDataSet);
+procedure DefaultOptions;
+function SetOptions : string;
+
 
 implementation
 
@@ -422,6 +426,40 @@ begin
      Inc(i);
    until S2 = '';
 end;
+
+
+//***********************************
+function SetOptions : string;
+begin
+  with TStringList.Create do
+    try
+      Clear;
+      Add(IntToStr(MAXPORTS));
+      Add(IntToStr(PLAYBACKSPEED));
+      Add(IntToStr(CONCENSUSTIME));
+      Add(IntToStr(_PUSHPROTECTPERIOD));
+      Add(VIDEODIRECTORY);
+      Add(BoolToStr(VIEWSCREEN,true));
+      Add(BoolToStr(USEFTP,true));
+      Result := CommaText;
+    finally
+      Free;
+    end;
+end;
+
+// параменты соревнования по умолчанию
+procedure DefaultOptions;
+begin
+  MAXPORTS := 1;
+  PLAYBACKSPEED := _PLAYBACKSPEED;
+  CONCENSUSTIME := _CONCENSUSTIME;
+//  _PUSHPROTECTPERIOD не меняется
+  VIDEODIRECTORY := _VIDEODIRECTORY;
+  VIEWSCREEN := _VIEWSCREEN;
+  USEFTP   := _USEFTP;
+  FIRSTJUDGEMONITORNUM := 2;
+end;
+//****************************
 
 procedure TDataMain.tblCompetition2BeforeClose(DataSet: TDataSet);
 begin
@@ -757,19 +795,7 @@ end;
 
 procedure TDataMain.tblCompetitionNewRecord(DataSet: TDataSet);
 begin
-  with OptionsList do begin
-    Clear;
-    Add(IntToStr(MAXPORTS));
-    Add(IntToStr(_PLAYBACKSPEED));
-    Add(IntToStr(_CONCENSUSTIME));
-    Add(IntToStr(_PUSHPROTECTPERIOD));
-    Add(_VIDEODIRECTORY);
-    Add(IntToStr(tblType.FieldByName('MaxValue').AsInteger)); //_MAXVALUE
-    Add(IntToStr(tblType.FieldByName('MaxPenalty').AsInteger)); //_MAXPENALTY
-    Add(BoolToStr(_VIEWSCREEN,true));
-    Add(BoolToStr(_USEFTP,true));
-    DataMain.tblCompetition.FieldByName('Options').AsString := CommaText;
-  end;
+  tblCompetition.FieldByName('Options').AsString := SetOptions;
 end;
 
 procedure TDataMain.tblRoundBeforeOpen(DataSet: TDataSet);
@@ -826,12 +852,16 @@ begin
 end;
 
 procedure TDataMain.tblCompetitionAfterPost(DataSet: TDataSet);
-var Competition_ID: Integer;
+var i, Competition_ID, Event_ID: Integer;
 begin
   // создать зачет по умолчанию
   if tblEvent.IsEmpty then begin
-    Competition_ID := DataMain.tblCompetition.LastAutoincValue('Competition_ID');
+    Competition_ID := tblCompetition.LastAutoincValue('Competition_ID');
     tblEvent.InsertRecord([NULL, DEFAULT_EVENTNAME, Competition_ID]);
+    if MessageDlg('Хотите добавить туры?',
+      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+      for i := 1 to tblCompetitionRounds.Value do
+        tblRound.InsertRecord([NULL, Competition_ID, tblEvent.LastAutoincValue('Event_ID')]);
   end;
 end;
 
@@ -981,6 +1011,19 @@ end;
 procedure TDataMain.tblRoundAfterPost(DataSet: TDataSet);
 begin
   ReOpenDataset(qryPool);
+end;
+
+procedure TDataMain.tblEventAfterPost(DataSet: TDataSet);
+var i: integer;
+begin
+{
+  // как определить что добавлен новый event?
+  if MessageDlg('Хотите добавить туры?',
+    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    for i := 1 to tblCompetitionRounds.Value do
+      if  then continue;
+      tblRound.InsertRecord([NULL, tblCompetitionCompetition_ID, tblEventEvent_ID.Value]);
+}
 end;
 
 end.

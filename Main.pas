@@ -211,7 +211,7 @@ begin
       if ShowModal = mrOk then begin
         // выбранное соревнование принадлежит списку
         N18.Enabled := ((Convert(WSCPEvents) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
-        N19.Enabled := ((Convert(FSEvents) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
+        N19.Enabled := ((Convert(FSEvents+AEEvents) shr DataMain.tblCompetition.FieldByName('Type_ID').AsInteger and 1) = 1) and License^.Active;
       end
       else begin
         // если не выбрано соревнование
@@ -224,13 +224,13 @@ begin
 
   Caption := Format('%s - "%s"',[APPLICATIONCAPTION, DataMain.tblCompetitionName.AsString]);
   SetLength( PortState, MAXPORTS );
-  
-  // TFTP
-  IdTrivialFTPServer1.ThreadedEvent := USEFTP;
-  IdTrivialFTPServer1.Active := USEFTP;
-  { Set the path to where the files will be stored/retreived }
-  TFTPPath := IncludeTrailingPathDelimiter(VIDEODIRECTORY);
-  // -TFTP
+    // TFTP
+  if USEFTP and DirectoryExists(VIDEODIRECTORY) then begin
+    IdTrivialFTPServer1.ThreadedEvent := USEFTP;
+    IdTrivialFTPServer1.Active := USEFTP;
+    { Set the path to where the files will be stored/retreived }
+    TFTPPath := IncludeTrailingPathDelimiter(VIDEODIRECTORY);
+  end;
 
   if OpenForm(Competition_GUID) then TfCompetition.Create(Self);
 end;
@@ -454,7 +454,7 @@ begin
     else begin
       StatusBar1.Panels[1].Text := CONSOLINACTIVE;
         // закрыть форму приглашения активации
-      for i:= 0 to High(PortState) do 
+      for i:= 0 to High(PortState) do
         FreeAndNil(PortState[i].Form);
     end;
   end;
@@ -473,12 +473,14 @@ begin
   finally
     fOptions.Free;
   end;
-  // TFTP
-  IdTrivialFTPServer1.ThreadedEvent := USEFTP;
-  IdTrivialFTPServer1.Active := USEFTP;
-  { Set the path to where the files will be stored/retreived }
-  TFTPPath := IncludeTrailingPathDelimiter(VIDEODIRECTORY);
-  // -TFTP
+  if USEFTP and DirectoryExists(VIDEODIRECTORY) then begin
+    // TFTP
+    IdTrivialFTPServer1.ThreadedEvent := USEFTP;
+    IdTrivialFTPServer1.Active := USEFTP;
+    { Set the path to where the files will be stored/retreived }
+    TFTPPath := IncludeTrailingPathDelimiter(VIDEODIRECTORY);
+    // -TFTP
+  end;
   SetLength( PortState, MAXPORTS );
 end;
 

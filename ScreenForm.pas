@@ -66,8 +66,6 @@ type
     Scores, PScores :   TArrPoint;  //оценки судейства
     Undo : array of TUndoPoint;// изменени€ внесенные редактором
     V : ^TPoint;        // сюда записываетс€ ввод из AddDigit
-      {может указывать на Scores[Sequence]
-       или на ErrV в режиме mValue }
   end;
 
 
@@ -133,24 +131,24 @@ begin
 end;
 
 //It's "auto-sizing" of a column
-procedure AutoSizeCol(Grid: TStringGrid; Column: integer);
+procedure AutoSizeCol(var Grid: TStringGrid; Column: integer);
 var
   i, W, WMax: integer;
 begin
-  WMax := 20;
-  for i := 0 to (Grid.RowCount - 1) do begin
+  WMax := 0;
+  for i := 0 to Grid.RowCount-1 do begin
     W := Grid.Canvas.TextWidth(Grid.Cells[Column, i]);
-    if W > WMax then
-      WMax := W;
+    if W+20 > WMax then WMax := W;
   end;
-  Grid.ColWidths[Column] := WMax + 5;
+  if WMax > Grid.DefaultColWidth then Grid.ColWidths[Column] := WMax+40
+  else Grid.ColWidths[Column] := Grid.DefaultColWidth;
 end;
 
 procedure TfJudgeConsol.grdJumpResultDrawColumnCell(Sender: TObject;
   const Rect: TRect; DataCol: Integer; Column: TColumn;
   State: TGridDrawState);
 begin
-//  AutoSizeCol(TStringGrid(Sender), DataCol);
+//  AutoSizeCol(grdJumpResult, DataCol);
   with grdJumpResult do begin
     if DataSource.DataSet.FieldByName('R').AsInteger = 100 then
       Canvas.Brush.Color := clYellow
@@ -174,7 +172,6 @@ var EditLine: integer;
        Result := Result + A[i].Value;
   end;
 begin
-//  AutoSizeCol(TStringGrid(Sender), ACol);
   with PortState[PortNum] do begin
     StatusBar1.Panels[0].Text := Format(RESULTTIME,[(Scores[Sequence].Time-StartTime)/1000000,GetSum(Scores[Sequence].Err)]);
     if Mode = mError then EditLine := 2 else EditLine := 1;
@@ -207,7 +204,7 @@ begin
           TextOut(Rect.Left, Rect.Top+H, A[1]); // ќценка предыдущего просмотра
         end;
     end;
-
+  AutoSizeCol(grdScore, ACol);
   with grdScore do
     if PortState[PortNum].Sequence < LeftCol then  //влево
       LeftCol := PortState[PortNum].Sequence + 1

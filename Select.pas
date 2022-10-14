@@ -20,14 +20,13 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
-    procedure DefaultSettings;
   public
     { Public declarations }
   end;
 
 var
   fSelection: TfSelection;
-  
+
 
 implementation
 
@@ -35,28 +34,10 @@ uses Unit5, constant, Main, wthread, DB;
 
 {$R *.dfm}
 
-procedure TfSelection.DefaultSettings;
-begin
-  with DataMain.tblCompetition do begin
-    Filter := '';
-    Filtered := false;
-  end;
-
-// параменты по умолчанию
-  MAXPORTS := 1;
-  PLAYBACKSPEED := _PLAYBACKSPEED;
-  CONCENSUSTIME := _CONCENSUSTIME;
-//  _PUSHPROTECTPERIOD не меняется
-  VIDEODIRECTORY := _VIDEODIRECTORY;
-  MAXVALUE := DataMain.tblType.FieldByName('MaxValue').AsInteger; //_MAXVALUE;
-  MAXPENALTY := DataMain.tblType.FieldByName('MaxPenalty').AsInteger; //_MAXPENALTY;
-  VIEWSCREEN := _VIEWSCREEN;
-  USEFTP   := _USEFTP;
-  FIRSTJUDGEMONITORNUM := 2;
-end;
 
 procedure TfSelection.Button1Click(Sender: TObject);
 var i : integer;
+    O : TStringList;
 begin
   with DataMain.tblCompetition do begin
     Filter := 'Competition_ID='+IntToStr(FieldByName('Competition_ID').AsInteger);
@@ -64,9 +45,9 @@ begin
     if (((Convert(License^.EventType) shr FieldByName('Type_ID').AsInteger) and 1) = 0) then
         ShowMessage(LICENSETYPEMSG);
     try
-      with OptionsList do begin
+      O := TStringList.Create;
+      with O do begin
         CommaText := FieldByName('Options').AsString;
-        if Count < 9 then Add('False');
         for i := 0 to Count-1 do
           case i of
             0: if StrToInt(Strings[i]) > License^.QtyLicense then MAXPORTS := License^.QtyLicense
@@ -75,28 +56,34 @@ begin
             2: CONCENSUSTIME := StrToInt(Strings[i]);
             3: ;//PUSHPROTECTPERIOD := StrToInt(Strings[i]);
             4: VIDEODIRECTORY := Strings[i];
-            5: MAXVALUE := StrToInt(Strings[i]);
-            6: MAXPENALTY := StrToInt(Strings[i]);
-            7: begin
+            5: begin
                  VIEWSCREEN := StrToBool(Strings[i]);
                  if VIEWSCREEN then
                     FIRSTJUDGEMONITORNUM := 1
                  else
                     FIRSTJUDGEMONITORNUM := 2;
                end;
-            8: USEFTP   := StrToBool(Strings[i]);
+            6: USEFTP := StrToBool(Strings[i]);
+            else ;
           end;
       end;
     except
-      DefaultSettings;
+      Filter := '';
+      Filtered := false;
+      DefaultOptions;
     end;
+    O.Free;    
   end;
 //  ChDir(VIDEODIRECTORY); //сменить текущий каталог 
 end;
 
 procedure TfSelection.Button2Click(Sender: TObject);
 begin
-  DefaultSettings;
+  with DataMain.tblCompetition do begin
+    Filter := '';
+    Filtered := false;
+  end;
+  DefaultOptions;
 end;
 
 procedure TfSelection.FormShow(Sender: TObject);

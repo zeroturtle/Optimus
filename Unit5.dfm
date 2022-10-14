@@ -857,15 +857,17 @@ object DataMain: TDataMain
     object tblRoundCompetition_ID: TIntegerField
       FieldName = 'Competition_ID'
     end
+    object tblRoundEvent_ID: TIntegerField
+      FieldName = 'Event_ID'
+    end
     object tblRoundRound_Num: TWordField
       FieldName = 'Round_Num'
     end
-    object tblRoundPool_Sequence_Code: TStringField
-      FieldName = 'Pool_Sequence_Code'
-      OnChange = tblRoundPool_Sequence_CodeChange
-    end
     object tblRoundRound_Type: TIntegerField
       FieldName = 'Round_Type'
+    end
+    object tblRoundDisabled: TBooleanField
+      FieldName = 'Disabled'
     end
     object tblRoundTypeName: TStringField
       FieldKind = fkLookup
@@ -877,9 +879,6 @@ object DataMain: TDataMain
       Size = 200
       Lookup = True
     end
-    object tblRoundEvent_ID: TIntegerField
-      FieldName = 'Event_ID'
-    end
     object tblRoundEventName: TStringField
       DisplayWidth = 50
       FieldKind = fkLookup
@@ -890,9 +889,6 @@ object DataMain: TDataMain
       KeyFields = 'Event_ID'
       Size = 50
       Lookup = True
-    end
-    object tblRoundDisabled: TBooleanField
-      FieldName = 'Disabled'
     end
     object tblRoundFigure1: TStringField
       FieldName = 'Figure1'
@@ -918,6 +914,10 @@ object DataMain: TDataMain
       FieldKind = fkCalculated
       FieldName = 'Round_Title'
       Calculated = True
+    end
+    object tblRoundPool_Sequence_Code: TStringField
+      FieldName = 'Pool_Sequence_Code'
+      OnChange = tblRoundPool_Sequence_CodeChange
     end
   end
   object tblMember: TABSTable
@@ -2079,13 +2079,14 @@ object DataMain: TDataMain
         'D) CNT'
       
         '  FROM ViewDetail vd  LEFT JOIN ViewError ve ON (vd.Sequence=ve.' +
-        'Sequence) WHERE ve.Result_ID=vd.Result_ID AND vd.:Result_ID'
+        'Sequence) WHERE ve.Result_ID=vd.Result_ID AND vd.Result_ID=:Resu' +
+        'lt_ID'
       '  GROUP BY Result_ID, Sequence, Error_ID, SQV) a'
       '  LEFT JOIN Errors e ON e.Error_ID=a.Error_ID'
       'GROUP BY  SQV, Description'
       
         'HAVING max(CNT)  >= (SELECT cast(count(Monitor) float)/2 FROM Re' +
-        'sultDetail WHERE :Result_ID) '
+        'sultDetail WHERE Result_ID=:Result_ID) '
       'ORDER BY 1')
     Left = 568
     Top = 152
@@ -2298,6 +2299,7 @@ object DataMain: TDataMain
     DatabaseName = 'dbJudge'
     InMemory = False
     ReadOnly = False
+    AfterPost = tblEventAfterPost
     OnNewRecord = tblEventNewRecord
     StoreDefs = True
     IndexDefs = <

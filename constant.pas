@@ -50,87 +50,92 @@ type
 const
   CR = #13;
   FSEvents = [FS2,FS4,FS8,VFS,SF,SF6,CF];
-  AEvents = [FFF,FFC,FFS]; //Free,Comp,Sert
+  AEEvents = [FFF,FFC,FFS]; //Free,Comp,Sert
   WSCPEvents = [WSP,WSA,CP];
-  AllEvents = FSEvents + AEvents + WSCPEvents;
+  AllEvents = FSEvents + AEEvents + WSCPEvents;
 
 resourcestring
 //  Все надписи в программе
   APPLICATIONCAPTION = 'OPTIMUS';
-  APPNAME         = 'Система электронного судейства';
-  APPCONTRIB      = 'При поддержке ДЗ Майское (Днепропетровск, Украина)';
-  APPVERSIONNUMBER= 'Версия: %s';
-  APPCOPYRIGHT    = 'Автор ©: 2009 - 2022  Александр Ткаченко';
-  APPAUTORSITE    = 'optimus.skydive.dp.ua';
+  APPNAME           = 'Система электронного судейства';
+  APPCONTRIB        = 'При поддержке ДЗ Майское (Днепропетровск, Украина)';
+  APPVERSIONNUMBER  = 'Версия: %s';
+  APPCOPYRIGHT      = 'Автор ©: 2009 - 2022  Александр Ткаченко';
+  APPAUTORSITE      = 'optimus.skydive.dp.ua';
 
 // сообщения в журнал работы программы
-  FALSESTARTMSG    = '%s Несинхронный запуск таймера Монитор №%d (%s) : %.0f мс';
-  CONFIRMMSG       = 'Дождитесь подсчета результата!';
-  SAVESCORESMSG    = '%s Запись результатов порта %d (%s)';
-  MONITORCOUNTMSG  = '%s Количество подключенных мониторов %d';
-  INVITEPORTMSG    = 'Нажмите номер консоли, цифру от 1 до %d';
-  MONITORRESMSG    = '%s Monitor# %d hMon: %x HDC: %x Left: %d Top: %d Right: %d Bottom: %d';
-  APPCLOSEMSG      = 'Завершить работу программы?';
-  KEYPRESSMSG      = '%s порт %d нажал кнопку %d в %f';
-  STARTTIMEMSG     = 'Время старта рабочего времени %d';
-  CONSACTIVATEDMSG = 'Keyboard #%d activated';
-  CHANGEMODEMSG    = '%s утановлен режим %s для порта %d';
-  REVIEWFRAMEMSG   = 'Установлен просмотра фрагмента от %d до %d ';
-  REVIEWMSG        = '%s Просмотр №%d';
-  PLAYBACKSPEEDMSG = 'Скорость просмотра %.0f%%';
-  CLOSEMSG         = '%s Закончили оценку';
-  BREAKMSG         = '%s Досрочный выход';
-  PENALTYMSG       = 'Порт %d поставил штраф за невидность отделения';
-  EMPTYLISTMSG     = 'Нет доступных записей для просмотра';
-  MINPOINTSERRORMSG= 'ВНИМАНИЕ!  Количество оценок меньше допустимого %d';
-  PENALTYERRORMSG  = 'ОШИБКА!  Оценка №%d укажите причину нулевой оценки';
-  MAXVALUEERRORMSG = 'ОШИБКА!  Оценка №%d больше допустимого значения %d';
-  MAXPENALTYERRORMSG='ОШИБКА!  Оценка №%d Сумма штрафа %.1f превышает значение оценки';
-  RANGEERRORMSG    = 'ОШИБКА!  Введено неверное значение';  
-  CONSNUMERRORMSG  = 'Недопустимый номер судейской консоли (%d)';
-  ATTANTIONMSG     = 'ВНИМАНИЕ!  Функция не поддерживается';
-  LICENSEMSG       = 'Ошибка чтения лицензии';
-  LICENSEEXPIREDMSG= 'Используется простроченная лицензия';
-  LICENSEUNREGMSG  = 'Нерегистрированная копия';
-  LICENSETYPEMSG   = 'Тип отсутствует в списке лицензии';
+  FALSESTARTMSG     = '%s Несинхронный запуск таймера Монитор №%d (%s) : %.0f мс';
+  CONFIRMMSG        = 'Дождитесь подсчета результата!';
+  SAVESCORESMSG     = '%s Запись результатов порта %d (%s)';
+  MONITORCOUNTMSG   = '%s Количество подключенных мониторов %d';
+  INVITEPORTMSG     = 'Нажмите номер консоли, цифру от 1 до %d';
+  MONITORRESMSG     = '%s Monitor# %d hMon: %x HDC: %x Left: %d Top: %d Right: %d Bottom: %d';
+  APPCLOSEMSG       = 'Завершить работу программы?';
+  KEYPRESSMSG       = '%s порт %d нажал кнопку %d в %f';
+  STARTTIMEMSG      = 'Время старта рабочего времени %d';
+  CONSACTIVATEDMSG  = 'Keyboard #%d activated';
+  CHANGEMODEMSG     = '%s утановлен режим %s для порта %d';
+  REVIEWFRAMEMSG    = 'Установлен просмотра фрагмента от %d до %d ';
+  REVIEWMSG         = '%s Просмотр №%d';
+  PLAYBACKSPEEDMSG  = 'Скорость просмотра %.0f%%';
+  CLOSEMSG          = '%s Закончили оценку';
+  BREAKMSG          = '%s Досрочный выход';
+  PENALTYMSG        = 'Порт %d поставил штраф за невидность отделения';
+  EMPTYLISTMSG      = 'Нет доступных записей для просмотра';
+  MINPOINTSERRORMSG = 'ВНИМАНИЕ!  Количество оценок меньше допустимого %d';
+  PENALTYERRORMSG   = 'ОШИБКА!  Оценка №%d укажите причину нулевой оценки';
+  MAXVALUEERRORMSG  = 'ОШИБКА!  Оценка №%d больше допустимого значения %d';
+  MAXPENALTYERRORMSG='ОШИБКА!  Оценка №%d Сумма штрафа %.1f больше MAXPENALTY';
+  POINTPENALTYERRORMSG='ОШИБКА!  Оценка №%d Сумма штрафа %.1f превышает значение оценки';
+  RANGEERRORMSG     = 'ОШИБКА!  Введено неверное значение';
+  CONSNUMERRORMSG   = 'Недопустимый номер судейской консоли (%d)';
+  ATTANTIONMSG      = 'ВНИМАНИЕ!  Функция не поддерживается';
+  LICENSEMSG        = 'Ошибка чтения лицензии';
+  LICENSEEXPIREDMSG = 'Используется простроченная лицензия';
+  LICENSEUNREGMSG   = 'Нерегистрированная копия';
+  LICENSETYPEMSG    = 'Тип отсутствует в списке лицензии';
 
-  CONSOLACTIVE     = 'Пульты активны';
-  CONSOLINACTIVE   = 'Пульты выключены';
+  CONSOLACTIVE      = 'Пульты активны';
+  CONSOLINACTIVE    = 'Пульты выключены';
 
-  RESULTTIME       = 'Время оценки: %.2f сек; Штраф: %.2f';
-  CONSOLTITLE      = 'Судейская консоль № %d (%s)';
-  REQUESTSTRING    = 'Установленные запросы: ';
-  TABLESTRINGS     = 'Фигуры,Оценки,Ошибки'; //названия строк редактора консоли
-  ERRORITEM0       = 'Убрать ошибку';
-  JUDGINGTITLE     = '%s '+CR+'Тур №%s, команда %s'+CR+'%s';
+  RESULTTIME        = 'Время оценки: %.2f сек; Штраф: %.2f';
+  CONSOLTITLE       = 'Судейская консоль № %d (%s)';
+  REQUESTSTRING     = 'Установленные запросы: ';
+  TABLESTRINGS      = 'Фигуры,Оценки,Ошибки'; //названия строк редактора консоли
+  ERRORITEM0        = 'Убрать ошибку';
+  JUDGINGTITLE      = '%s '+CR+'Тур №%s, команда %s'+CR+'%s';
 
 // Меню судейской консоли
-  MAINMENUITEM0    = 'Отменить крайнее изменение';
-  MAINMENUITEM1    = 'Показать жеребьевку';
-  MAINMENUITEM2    = 'Показать описание ошибок';
-  MAINMENUITEM3    = 'Запрос: Просмотр фрагмента';
-  MAINMENUITEM4    = 'Запрос: Не видно отделения (штраф -20)';
-  MAINMENUITEM5    = 'Сохранить результат';
-  MAINMENUITEM6    = 'Поменять оценки с предыдущим просмотром с текущим';
+  EDITMENUITEM0     = 'Отменить крайнее изменение';
+  EDITMENUITEM1     = 'Показать жеребьевку';
+  EDITMENUITEM2     = 'Показать описание ошибок';
+  EDITMENUITEM3     = 'Запрос: Дополнительный просмотр';
+  EDITMENUITEM4     = 'Запрос: Штраф на оценку';
+  EDITMENUITEM5     = 'Сохранить результат';
+  EDITMENUITEM6     = 'Поменять оценки с предыдущим просмотром с текущим';
 
-  SCORINGMENUITEM0  = 'Просмотр на стандартной скорости';
-  SCORINGMENUITEM1  = 'Просмотр на замедленной скорости';
+  SCORINGMENUITEM0  = 'Просмотр сначала';
+  SCORINGMENUITEM1  = 'Скорость просмотра замедленно ';
+
+  //Выбрать консоль запуска таймера
+  FALSENUITEM0      = 'Старт Все консоли';
+  FALSENUITEM1      = 'Старт консоль 1';
+  FALSENUITEM2      = 'Старт консоль 2';
+  FALSENUITEM3      = 'Старт консоль 3';
+  FALSENUITEM4      = 'Старт консоль 4';
+  FALSENUITEM5      = 'Старт консоль 5';
+  FALSENUITEM6      = 'Просмотр сначала';
 
   CONFIRMMENUITEM0  = 'Повторный просмотр';
-  CONFIRMMENUITEM1  = 'Просмотр фрагмента';
-  CONFIRMMENUITEM2  = 'Редактор результата';
-  CONFIRMMENUITEM3  = 'Сохранить результат';
-  CONFIRMMENUITEM4  = 'Показать оценки результата';
-  CONFIRMMENUITEM5  = 'Показать время результата';
-  CONFIRMMENUITEM6  = 'Показать ошибки результата';
-
-  CONTROLMENU0 = 'Просмотр видео';
-  CONTROLMENU1 = 'Выбрать консоль запуска таймера ';
-  CONTROLMENU2 = 'Указать скорость просмотра ';
-  CONTROLMENU3 = 'Просмотр фрагмента с ';
-  CONTROLMENU4 = 'Просмотр фрагмента по ';
-  CONTROLMENU5 = 'Редактировать оценки';
-  CONTROLMENU6 = 'Сохранить результаты';
+  CONFIRMMENUITEM1  = 'Скорость просмотра замедленно ';
+  CONFIRMMENUITEM2  = 'Задать начало фрагмента ';
+  CONFIRMMENUITEM3  = 'Задать конец фрагмента ';
+  CONFIRMMENUITEM4  = 'Просмотр фрагмента';
+  CONFIRMMENUITEM5  = 'Редактировать оценки';
+  CONFIRMMENUITEM6  = 'Сохранить результаты и завершить';
+  CONFIRMMENUITEM7  = 'Показать оценки результата';
+  CONFIRMMENUITEM8  = 'Показать время результата';
+  CONFIRMMENUITEM9  = 'Показать ошибки результата';
 
   JUDGECALL0     = 'Нет';
   JUDGECALL1     = 'Повторный просмотр';
@@ -201,22 +206,14 @@ HELPCONTENT =
   _SPLASHFORMTIME = 3000;     //ждать 3 секунды
   _PUSHPROTECTPERIOD = 200;   // Период в который блокируется двойное нажатие кнопок, мс
   _CONCENSUSTIME  = 150;      // задержка переключения Sequence ,ms
-//  _MAXVALUE       = 1;        // наибольшая оценка что можно поставить.
-//  _MAXPENALTY     = 0;        // максимальный штраф
   _PLAYBACKSPEED  = 50;       // Скорость замедленного просмотра
   _BEEPQUANTITY   = 6;        // Количество beep
   _VIEWSCREEN     = false;    // показывать видео на экранах консолей
   _USEFTP         = false;    // будет ли использоваться FTP сервер
   _VIDEODIRECTORY = '.\video\';
   _DEFAULTTFTPIP  = '127.0.0.1';
-
-  PAUSETIME        = 5; // длительность стоп-кадра ожидания крайней оценки, сек
-  PAUSECONFIRM     = 1; // ожидание запросов судей после оглашения результатов, мс
-
-  TASKMENULIST   : array[0..6] of String = (MAINMENUITEM0,MAINMENUITEM1,MAINMENUITEM2,MAINMENUITEM3,
-                               MAINMENUITEM4,MAINMENUITEM5,MAINMENUITEM6);
-  CONFIRMMENULIST: array[0..3] of String  =(CONFIRMMENUITEM0,CONFIRMMENUITEM1,CONFIRMMENUITEM2,CONFIRMMENUITEM3);
-  SCORINGMENULIST: array[0..1] of String  =(SCORINGMENUITEM0, SCORINGMENUITEM1);
+  _PAUSETIME        = 5; // длительность стоп-кадра ожидания крайней оценки, сек
+  _PAUSECONFIRM     = 1; // ожидание запросов судей после оглашения результатов, мс
 
 // Запросы судей
   JC_NONE      = $00;   //ничего
@@ -263,30 +260,32 @@ var
   PicFileName : string;
   LogFileName : string;
   MultiuserDBMode : boolean;
-  REPORTDIRECTORY : string = '.\Reports\';
+  BackgoundPic : TBitmap;      // фоновая картинка для консолей 
+  CurrentMode: TMode;          // текущий режим работы системы
+  StartTime : Int64;           // время начала судейства
+  License : PLicense;
 
+
+  REPORTDIRECTORY : string = '.\Reports\';
   MAXPOINTS : integer = 1;     //Число оценок которое можно запомнить
-  MINPOINTS : integer = 0;     //Число оценок которое ставится при старте 
+  MINPOINTS : integer = 0;     //Число оценок которое ставится при старте
   MAXPORTS : integer = 1;      //Количество портов
   TYPEID   : integer;
-  CONCENSUSTIME : integer = _CONCENSUSTIME;
-  MAXVALUE : integer;
-  MAXPENALTY : integer;
-  PLAYBACKSPEED : integer = _PLAYBACKSPEED;
-  VIEWSCREEN : boolean = _VIEWSCREEN;
-  VIDEODIRECTORY : string = _VIDEODIRECTORY;    // каталог хранения видео
-  DEFAULTTFTPIP : string = _DEFAULTTFTPIP;
-  USEFTP : boolean = _USEFTP;
-  FIRSTJUDGEMONITORNUM : integer = 2;   // подключение мониторов
+  CONCENSUSTIME : integer;
+  MAXVALUE : integer;          // наибольшая оценка что можно поставить.
+  MAXPENALTY : integer;        // максимальный штраф
+  PLAYBACKSPEED : integer;
+  VIEWSCREEN : boolean;
+  VIDEODIRECTORY : string;     // каталог хранения видео
+  DEFAULTTFTPIP : string;
+  USEFTP : boolean;
+  FIRSTJUDGEMONITORNUM : integer;   // подключение мониторов
                                         // 0 - это экран компьютера
                                         // 1 - телевизор
                                         // 2..n - мониторы судей
-  CurrentMode: TMode;         // текущий режим работы системы
-  StartTime : Int64;          // время начала судейства
-  License : PLicense;
-  OptionsList : TStringList;
-  BackgoundPic : TBitmap;
-  
+
+
+
 function GetString(const Index: integer) : string;
 function Convert(Value: TEventSet) : word;
 

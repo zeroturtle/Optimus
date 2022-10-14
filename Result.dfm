@@ -27,13 +27,6 @@ inherited fResult: TfResult
       Hint = #1055#1086#1089#1095#1080#1090#1072#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090
       Action = act_Calc
     end
-    object ToolButton3: TToolButton
-      Left = 232
-      Top = 0
-      Hint = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1086#1094#1077#1085#1082#1091
-      Action = act_Change
-      Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1086#1094#1077#1085#1082#1091
-    end
   end
   inherited ctl_FilterPanel: TPanel
     Left = 498
